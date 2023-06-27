@@ -6,14 +6,14 @@ import json
 
 # status: 0 -> 连接成功
 # status: 99 -> request method 不对
+# response = {status: int, files: list<str>}
 @csrf_exempt
 def test_connection(request):
     if request.method == "POST":
         data = json.loads(request.body)
         directory = data.get("directory")
-        filename = data.get("filename")
 
-        hadoop = HDFS(directory, filename)
+        hadoop = HDFS(directory)
         res = hadoop.test_connection()
         print(res)
         return JsonResponse(res)
@@ -25,6 +25,7 @@ def test_connection(request):
 
 # status: 0 -> 迁移成功
 # status: 99 -> request method 不对
+# response = {status: int}
 @csrf_exempt
 def data_transfer(request):
     if request.method == "POST":

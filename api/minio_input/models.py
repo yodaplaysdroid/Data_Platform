@@ -1,40 +1,65 @@
-import dmPython
-import os
-import datetime
+from minio import Minio
 import pandas as pd
-import subprocess
+import dmPython
+import datetime
 
 
-# HDFS 类
-class HDFS:
-    def __init__(self, directory: str) -> None:
-        self.directory = directory
+# MinIO 类
+# 存放着所有基于 MinIO 数据迁移的函数
+class Minio_Input:
+    def __init__(self, endpoint: str, access_key: str, secret_key: str) -> None:
+        self.conn = Minio(
+            endpoint=endpoint,
+            access_key=access_key,
+            secret_key=secret_key,
+            secure=False,
+        )
 
-    # 测试链接
-    # status: 0 -> 成功连接
-    # status: -1 -> 连接失败（可能文件不存在/链接事故）
+    # 连接测试
+    # status: 0 -> 连接成功
+    # status: -1 -> 连接失败
     def test_connection(self) -> dict:
         res = {}
         try:
-            process = subprocess.Popen(
-                f"rclone ls {self.directory}",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True,
-            )
-            output, error = process.communicate()
-            if process.returncode != 0:
-                print(f"Error executing command: {error.decode()}")
-                res["status"] = -1
+            if not self.conn.bucket_exists("nonexistingbucket"):
+                res["status"] = 0
             else:
                 res["status"] = 0
-                res["files"] = []
-                results = output.decode().splitlines()
-                for r in results:
-                    res["files"].append(" ".join(r.split(" ")[3:]))
-
         except Exception as e:
-            print("Connection Error / File Not Found:", e)
+            print(e)
+            res["status"] = -1
+
+        return res
+
+    # 列出 buckets
+    # status: 0 -> 过程成功
+    # status: -1 -> 出错
+    def list_buckets(self) -> dict:
+        res = {}
+        try:
+            buckets = self.conn.list_buckets()
+            res["status"] = 0
+            res["buckets"] = []
+            for bucket in buckets:
+                res["buckets"].append(bucket.name)
+        except Exception as e:
+            print(e)
+            res["status"] = -1
+        return res
+
+    # 列出 bucket 里的文件
+    # status: 0 -> 过程成功
+    # status: -1 -> 出错
+    def list_files(self, bucket: str) -> dict:
+        res = {}
+        try:
+            objects = self.conn.list_objects(bucket, recursive=True)
+            res["status"] = 0
+            res["objects"] = []
+            for object in objects:
+                res["objects"].append(object.object_name)
+        except Exception as e:
+            print(e)
             res["status"] = -1
         return res
 
@@ -56,7 +81,7 @@ class HDFS:
         city = list(range(1, 100))
 
         # 验证校验码是否正确
-        def verify(id: str):
+        def verify(id):
             sum = 0
             wi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
             for i in range(17):
@@ -66,7 +91,7 @@ class HDFS:
             return id[17] == rem[j]
 
         # 验证身份证的日期正确性
-        def is_valid_date(date_string: str):
+        def is_valid_date(date_string):
             try:
                 datetime.strptime(date_string, "%Y%m%d")
                 return True
@@ -89,21 +114,23 @@ class HDFS:
             return False
         return True
 
-    # 数据导入从 HDFS 存储到达梦数据库
-    # status: -1 -> 链接事故
-    # status: -2 -> 文件格式出错/无法读取文件/ excel 页名不对
-    # status: -10 -> 达梦链接不上
+    # 采取数据
+    # status: 0 -> 成功
+    # status: -1 -> 连接失败
+    # status: -2 -> 文件不存在
+    # status: -10 -> 达梦连不上
+    # status: >1 -> 数据导入问题（可能出现违规 sql 约束问题）
     def extract(
-        self, filetype: str, filename: str, write_table: str, sheet_name: str
+        self,
+        bucket: str,
+        directory: str,
+        write_table: str,
+        filetype: str,
+        sheet_name="",
     ) -> dict:
         res = {}
-        try:
-            os.system(f"rclone copy {self.directory}{filename} /tmp")
-            os.system(f"mv /tmp/{filename} /tmp/hdfs")
-        except Exception as e:
-            print("Connection Error / File Not Found:", e)
+        if self.test_connection()["status"] != 0:
             res["status"] = -1
-            return res
 
         try:
             dm = dmPython.connect(
@@ -119,15 +146,20 @@ class HDFS:
             res["status"] = -10
             return res
 
-        count = 0
+        try:
+            self.conn.fget_object(bucket, directory, "/tmp/minio")
+        except Exception as e:
+            print(e)
+            res["status"] = -2
+            return res
 
         # 加载文件为 pandas dataframe 对象
         if filetype == "csv":
             try:
-                df = pd.read_csv("/tmp/hdfs", encoding="gbk", quotechar="'")
+                df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'")
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", quotechar="'")
+                    df = pd.read_csv("/tmp/minio", quotechar="'")
                 except Exception as f:
                     print(f)
                 print("File Reading Error", e)
@@ -135,10 +167,10 @@ class HDFS:
                 return res
         elif filetype == "txt":
             try:
-                df = pd.read_csv("/tmp/hdfs", sep="\t", encoding="gbk", quotechar="'")
+                df = pd.read_csv("/tmp/minio", sep="\t", encoding="gbk", quotechar="'")
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", sep="\t", quotechar="'")
+                    df = pd.read_csv("/tmp/minio", sep="\t", quotechar="'")
                 except Exception as f:
                     print(f)
                 print("File Reading Error", e)
@@ -146,7 +178,7 @@ class HDFS:
                 return res
         else:
             try:
-                df = pd.read_excel("/tmp/hdfs", sheet_name=sheet_name)
+                df = pd.read_excel("/tmp/minio", sheet_name=sheet_name)
             except Exception as e:
                 print("File Reading Error", e)
                 res["status"] = -2

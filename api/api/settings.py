@@ -6,7 +6,7 @@ SECRET_KEY = "django-insecure-(wp1@os_z*!^4@!ifah@l8gl!l=4lh@)*sc3gilanlx_vl8l_&
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "mysql_input",
     "hdfs_input",
+    "minio_input",
 ]
 
 MIDDLEWARE = [

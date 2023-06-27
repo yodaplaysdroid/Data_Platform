@@ -6,6 +6,7 @@ import json
 
 # status: 0 -> 过程成功执行
 # status: 99 -> 请求方式不对
+# response = {status: int}
 @csrf_exempt
 def test_connection(request):
     if request.method == "POST":
@@ -26,8 +27,9 @@ def test_connection(request):
 
 # status: 0 -> 过程成功执行
 # status: 99 -> 请求方式不对
+# response = {status: int, databases: list<str>}
 @csrf_exempt
-def get_database(request):
+def get_databases(request):
     if request.method == "POST":
         data = json.loads(request.body)
         username = data.get("username")
@@ -46,6 +48,7 @@ def get_database(request):
 
 # status: 0 -> 过程成功执行
 # status: 99 -> 请求方式不对
+# response = {status: int, tables: list<str>}
 @csrf_exempt
 def get_tables(request):
     if request.method == "POST":
@@ -67,6 +70,7 @@ def get_tables(request):
 
 # status: 0 -> 过程成功执行
 # status: 99 -> 请求方式不对
+# response = {status: int}
 @csrf_exempt
 def data_transfer(request):
     if request.method == "POST":
