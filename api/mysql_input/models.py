@@ -1,14 +1,15 @@
 import mysql.connector
 import dmPython
+import datetime
 
 
 # Mysql 类
 # 存放着所有基于 Mysql 数据迁移的函数
 class Mysql_Input:
-    def __init__(self, req) -> None:
-        self.username = req["username"]
-        self.password = req["password"]
-        self.host = req["host"]
+    def __init__(self, username: str, password: str, host: str) -> None:
+        self.username = username
+        self.password = password
+        self.host = host
         print(self.username, self.password, self.host)
 
     # get 本对象的基本信息
@@ -64,7 +65,7 @@ class Mysql_Input:
     # 对相应的数据库取表名
     # status: 0 -> 过程成功执行
     # status: -1 -> 连不上
-    def get_tables(self, database) -> dict:
+    def get_tables(self, database: str) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
             res["status"] = -1
@@ -85,12 +86,63 @@ class Mysql_Input:
             connection.close()
         return res
 
+    # 验证身份证格式
+    def __is_valid_id(id: str) -> bool:
+        # 省份代码集
+        province = (
+            list(range(11, 16))
+            + list(range(21, 24))
+            + list(range(31, 38))
+            + list(range(41, 47))
+            + list(range(50, 55))
+            + list(range(61, 66))
+            + [71, 81, 82]
+        )
+        # 城市代码集
+        state = list(range(0, 91))
+        # 区域代码集
+        city = list(range(1, 100))
+
+        # 验证校验码是否正确
+        def verify(id):
+            sum = 0
+            wi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
+            for i in range(17):
+                sum += int(id[i]) * wi[i]
+            j = sum % 11
+            rem = ["1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"]
+            return id[17] == rem[j]
+
+        # 验证身份证的日期正确性
+        def is_valid_date(date_string):
+            try:
+                datetime.strptime(date_string, "%Y%m%d")
+                return True
+            except ValueError:
+                return False
+
+        if int(id[0:2]) not in province:
+            return False
+        if int(id[2:4]) not in state:
+            return False
+        if int(id[4:6]) not in city:
+            return False
+        if not is_valid_date(id[6:14]):
+            return False
+        try:
+            int(id[14:17])
+        except:
+            return False
+        if not verify(id):
+            return False
+        return True
+
     # 从 Mysql 提取表数据并迁移至达梦数据库
     # status: 0 -> 过程成功执行
     # status: -10 -> 连接不上达梦数据库
     # status: -1 -> 此表不存在
     # status: >1 -> 数据导入问题（可能出现违规 sql 约束问题）
-    def extract(self, database, read_table, write_table) -> dict:
+    def extract(self, database: str, read_table: str, write_table: str) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
             res["status"] = -1
@@ -126,13 +178,32 @@ class Mysql_Input:
                 results = cursor.fetchall()
 
                 # 把数据一条一条刷入达梦数据库
-                for result in results:
-                    try:
-                        dmc.execute(f"insert into {write_table} values {result}")
-                    except Exception as e:
-                        dmc.execute(f"insert into {write_table}tmp values {result}")
-                        print(e)
-                        count += 1
+                # 治理客户身份证号码
+                if write_table == "客户信息":
+                    for result in results:
+                        try:
+                            if self.__is_valid_id(result[1]):
+                                dmc.execute(
+                                    f"insert into {write_table} values {result}"
+                                )
+                            else:
+                                dmc.execute(
+                                    f"insert into {write_table}tmp values {result}"
+                                )
+                                print("身份证格式不对")
+                                count += 1
+                        except Exception as e:
+                            dmc.execute(f"insert into {write_table}tmp values {result}")
+                            print(e)
+                            count += 1
+                else:
+                    for result in results:
+                        try:
+                            dmc.execute(f"insert into {write_table} values {result}")
+                        except Exception as e:
+                            dmc.execute(f"insert into {write_table}tmp values {result}")
+                            print(e)
+                            count += 1
 
                 res["status"] = count
 
