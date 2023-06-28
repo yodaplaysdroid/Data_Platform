@@ -64,7 +64,7 @@ class Minio_Input:
         return res
 
     # 验证身份证格式
-    def __is_valid_id(id: str) -> bool:
+    def __is_valid_id(self, id: str) -> bool:
         # 省份代码集
         province = (
             list(range(11, 16))
@@ -134,8 +134,8 @@ class Minio_Input:
 
         try:
             dm = dmPython.connect(
-                user="weiyin",
-                password="lamweiyin",
+                user="test",
+                password="Owkl.9130",
                 server="36.140.31.145",
                 port="31826",
                 autoCommit=True,
@@ -192,11 +192,17 @@ class Minio_Input:
                     if self.__is_valid_id(r[1]):
                         dmc.execute(f"insert into {write_table} values {tuple(r)}")
                     else:
-                        dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                        string = list(r)
+                        string.append("身份证格式不对")
+                        string = tuple(string)
+                        dmc.execute(f"insert into {write_table}tmp values {string}")
                         print("身份证格式不对")
                         count += 1
                 except Exception as e:
-                    dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                    string = list(r)
+                    string.append(str(e))
+                    string = tuple(string)
+                    dmc.execute(f"insert into {write_table}tmp values {string}")
                     print(e)
                     count += 1
         else:
@@ -204,7 +210,10 @@ class Minio_Input:
                 try:
                     dmc.execute(f"insert into {write_table} values {tuple(r)}")
                 except Exception as e:
-                    dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                    string = list(r)
+                    string.append(str(e))
+                    string = tuple(string)
+                    dmc.execute(f"insert into {write_table}tmp values {string}")
                     print(e)
                     count += 1
 

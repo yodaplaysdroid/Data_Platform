@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "mysql_input",
     "hdfs_input",
     "minio_input",
+    "error_handler",
 ]
 
 MIDDLEWARE = [

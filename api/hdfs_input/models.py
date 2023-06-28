@@ -94,7 +94,7 @@ class HDFS:
     # status: -2 -> 文件格式出错/无法读取文件/ excel 页名不对
     # status: -10 -> 达梦链接不上
     def extract(
-        self, filetype: str, filename: str, write_table: str, sheet_name: str
+        self, filetype: str, filename: str, write_table: str, sheet_name=""
     ) -> dict:
         res = {}
         try:
@@ -107,8 +107,8 @@ class HDFS:
 
         try:
             dm = dmPython.connect(
-                user="weiyin",
-                password="lamweiyin",
+                user="test",
+                password="Owkl.9130",
                 server="36.140.31.145",
                 port="31826",
                 autoCommit=True,
@@ -160,11 +160,17 @@ class HDFS:
                     if self.__is_valid_id(r[1]):
                         dmc.execute(f"insert into {write_table} values {tuple(r)}")
                     else:
-                        dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                        string = list(r)
+                        string.append("身份证格式不对")
+                        string = tuple(string)
+                        dmc.execute(f"insert into {write_table}tmp values {string}")
                         print("身份证格式不对")
                         count += 1
                 except Exception as e:
-                    dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                    string = list(r)
+                    string.append(str(e))
+                    string = tuple(string)
+                    dmc.execute(f"insert into {write_table}tmp values {string}")
                     print(e)
                     count += 1
         else:
@@ -172,7 +178,10 @@ class HDFS:
                 try:
                     dmc.execute(f"insert into {write_table} values {tuple(r)}")
                 except Exception as e:
-                    dmc.execute(f"insert into {write_table}tmp values {tuple(r)}")
+                    string = list(r)
+                    string.append(str(e))
+                    string = tuple(string)
+                    dmc.execute(f"insert into {write_table}tmp values {string}")
                     print(e)
                     count += 1
 
@@ -180,3 +189,7 @@ class HDFS:
         dm.close()
         res["status"] = count
         return res
+
+
+hadoop = HDFS("hdp:/")
+print(hadoop.extract("csv", "物流信息2022.txt", "物流信息", ""))

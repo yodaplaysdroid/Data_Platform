@@ -150,8 +150,8 @@ class Mysql_Input:
             # 连接达梦数据库
             try:
                 dm = dmPython.connect(
-                    user="weiyin",
-                    password="lamweiyin",
+                    user="test",
+                    password="Owkl.9130",
                     server="36.140.31.145",
                     port="31826",
                     autoCommit=True,
@@ -187,13 +187,19 @@ class Mysql_Input:
                                     f"insert into {write_table} values {result}"
                                 )
                             else:
+                                string = list(result)
+                                string.append("身份证格式不对")
+                                string = tuple(string)
                                 dmc.execute(
-                                    f"insert into {write_table}tmp values {result}"
+                                    f"insert into {write_table}tmp values {string}"
                                 )
                                 print("身份证格式不对")
                                 count += 1
                         except Exception as e:
-                            dmc.execute(f"insert into {write_table}tmp values {result}")
+                            string = list(result)
+                            string.append(str(e))
+                            string = tuple(string)
+                            dmc.execute(f"insert into {write_table}tmp values {string}")
                             print(e)
                             count += 1
                 else:
@@ -201,7 +207,10 @@ class Mysql_Input:
                         try:
                             dmc.execute(f"insert into {write_table} values {result}")
                         except Exception as e:
-                            dmc.execute(f"insert into {write_table}tmp values {result}")
+                            string = list(result)
+                            string.append(str(e))
+                            string = tuple(string)
+                            dmc.execute(f"insert into {write_table}tmp values {string}")
                             print(e)
                             count += 1
 
