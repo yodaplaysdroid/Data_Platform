@@ -189,7 +189,3 @@ class HDFS:
         dm.close()
         res["status"] = count
         return res
-
-
-hadoop = HDFS("hdp:/")
-print(hadoop.extract("csv", "物流信息2022.txt", "物流信息", ""))
