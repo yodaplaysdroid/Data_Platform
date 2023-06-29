@@ -65,17 +65,23 @@ class Mysql_Input:
     # 对相应的数据库取表名
     # status: 0 -> 过程成功执行
     # status: -1 -> 连不上
+    # status: -2 -> 禁止访问此数据库
     def get_tables(self, database: str) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
             res["status"] = -1
         else:
-            connection = mysql.connector.connect(
-                user=self.username,
-                password=self.password,
-                host=self.host,
-                database=database,
-            )
+            try:
+                connection = mysql.connector.connect(
+                    user=self.username,
+                    password=self.password,
+                    host=self.host,
+                    database=database,
+                )
+            except Exception as e:
+                print(e)
+                res["status"] = -2
+                return res
             cursor = connection.cursor()
             cursor.execute("show tables")
             results = cursor.fetchall()
