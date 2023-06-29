@@ -1,5 +1,16 @@
-import { Button, Link, MenuItem, Select, TextField } from "@mui/material";
-import { useState } from "react";
+import {
+  Alert,
+  Button,
+  FormControl,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Fragment, useState } from "react";
 
 const writeTables = [
   "物流公司",
@@ -17,22 +28,42 @@ export default function Hdfs() {
   const [writeTable, setWriteTable] = useState("");
   const [sheetName, setSheetName] = useState("");
 
-  const [page, setPage] = useState(["HDFS Input"]);
   const [isConnected, setIsConnected] = useState(1);
   const [files, setFiles] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(
+    <LinearProgress variant="determinate" value={0} />
+  );
+  const [snackbarStatus, setSnackbarStatus] = useState(false);
+  const action = (
+    <Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        onClick={() => setSnackbarStatus(false)}
+      >
+        <img src="/exit.png" style={{ height: 15 }}></img>
+      </IconButton>
+    </Fragment>
+  );
+  const action2 = (
+    <Fragment>
+      <Button color="warning" href="/">
+        处理
+      </Button>
+      <IconButton
+        size="small"
+        aria-label="close"
+        onClick={() => setSnackbarStatus(false)}
+      >
+        <img src="/exit.png" style={{ height: 15 }}></img>
+      </IconButton>
+    </Fragment>
+  );
+  const [alert, setAlert] = useState(<></>);
+  const [submitted, setSubmitted] = useState(false);
 
-  function handlePageChange(e: MouseEvent) {
-    let tmp = [];
-    for (let i in page) {
-      tmp.push(page[i]);
-      if (page[i] === e.currentTarget.id) {
-        break;
-      }
-    }
-    setPage(tmp);
-  }
-
-  function handleTest(e: React.MouseEvent) {
+  function handleTest() {
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -48,25 +79,28 @@ export default function Hdfs() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setIsConnected(data.status);
+        setSnackbarStatus(true);
         if (data.status === 0) {
-          setIsConnected(0);
           setFiles(data.files);
+          setAlert(
+            <Alert severity="success" action={action}>
+              数据库连接成功！
+            </Alert>
+          );
         } else {
-          setIsConnected(1);
+          setAlert(
+            <Alert severity="error" action={action}>
+              数据库连接失败
+            </Alert>
+          );
         }
       });
   }
 
-  function handleConnect(e: React.MouseEvent) {
-    setPage(page.concat(["Files"]));
-  }
-
-  function handleUseFile(e: React.MouseEvent) {
-    setFilename(e.currentTarget.id);
-    setPage(page.concat(["Configurations"]));
-  }
-
-  function handleSubmit(e: React.MouseEvent) {
+  function handleSubmit() {
+    setLoading(<LinearProgress />);
+    setSubmitted(true);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -86,35 +120,46 @@ export default function Hdfs() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setLoading(<LinearProgress variant="determinate" value={100} />);
+        setSnackbarStatus(true);
+        if (data.status === 0) {
+          setAlert(
+            <Alert severity="success" action={action}>
+              数据导入成功！
+            </Alert>
+          );
+        } else if (data.status <= 0) {
+          setAlert(
+            <Alert severity="error" action={action}>
+              数据导入出错！
+            </Alert>
+          );
+        } else {
+          setAlert(
+            <Alert severity="warning" action={action2}>
+              存在 {data.status} 条异常数据！
+            </Alert>
+          );
+        }
       });
   }
 
   return (
     <>
-      <a href="/">Menu</a>
-      {" / "}
-      {page.map((item, index) => (
+      <Typography variant="h6" sx={{ margin: "10px 0" }} align="right">
+        HDFS 数据导入
+      </Typography>
+      {loading}
+      {page === 1 ? (
         <>
-          <Link
-            id={item}
-            underline="hover"
-            color="inherit"
-            onClick={handlePageChange}
-          >
-            {item}
-          </Link>
-          {" / "}
-        </>
-      ))}
-      {page.length === 1 ? (
-        <>
-          <h1>Mysql Input</h1>
           <TextField
             id="endpoint"
             label="Endpoint"
             variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
             defaultValue="hadoopa-namenode.damenga-zone.svc:9000"
-            onChange={(e) => {
+            onChange={() => {
               setIsConnected(1);
             }}
           />
@@ -123,6 +168,8 @@ export default function Hdfs() {
             id="directory"
             label="Directory"
             variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
             defaultValue={directory}
             onChange={(e) => {
               setDirectory(e.target.value);
@@ -130,85 +177,134 @@ export default function Hdfs() {
             }}
           />
           <br />
-          <Button onClick={handleTest}>Test Connection</Button>
+          <Button fullWidth onClick={handleTest}>
+            <Typography variant="h6">测试连接</Typography>
+          </Button>
           <br />
           {isConnected === 0 ? (
-            <Button onClick={handleConnect}>Connect</Button>
+            <Button fullWidth onClick={() => setPage(2)}>
+              <Typography variant="h6">连接 HDFS</Typography>
+            </Button>
           ) : (
-            <Button disabled>Connect</Button>
+            <Button fullWidth disabled>
+              <Typography variant="h6">连接 HDFS</Typography>
+            </Button>
           )}
           <br />
         </>
       ) : null}
-      {page.length === 2 && files.length !== 0 ? (
+      {page === 2 && files.length !== 0 ? (
         <>
-          <h2>Files</h2>
-          <ul>
-            {files.map((item, index) => (
-              <li key={index}>
-                <Button id={item} onClick={handleUseFile}>
-                  {item}
-                </Button>
-              </li>
-            ))}
-          </ul>
+          <FormControl fullWidth>
+            <Select
+              value={filename}
+              onChange={(e) => setFilename(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              sx={{ margin: "5px 0" }}
+            >
+              <MenuItem value="">
+                <em>选择文件</em>
+              </MenuItem>
+              {files.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {filename !== "" && directory !== "" ? (
+            <Button
+              fullWidth
+              onClick={() => {
+                setPage(3);
+              }}
+            >
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          ) : (
+            <Button disabled fullWidth>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          )}
         </>
       ) : null}
-      {page.length === 3 ? (
+      {page === 3 ? (
         <>
-          <h2>
-            {directory}
-            {" -> "}
-            {filename}
-          </h2>
-          <Select
-            value={filetype}
-            onChange={(e) => setFiletype(e.target.value)}
-            displayEmpty
-            inputProps={{ "aria-label": "Without label" }}
-            size="small"
-          >
-            <MenuItem value="">
-              <em>Filetype</em>
-            </MenuItem>
-            <MenuItem value="csv">CSV</MenuItem>
-            <MenuItem value="xls">EXCEL</MenuItem>
-            <MenuItem value="txt">TSV</MenuItem>
-          </Select>
-          <br />
-          <Select
-            value={writeTable}
-            onChange={(e) => setWriteTable(e.target.value)}
-            displayEmpty
-            inputProps={{ "aria-label": "Without label" }}
-            size="small"
-          >
-            <MenuItem value="">
-              <em>Write Table</em>
-            </MenuItem>
-            {writeTables.map((item) => (
-              <MenuItem value={item}>{item}</MenuItem>
-            ))}
-          </Select>
-          <br />
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            endpoint: hadoopa-namenode.damenga-zone.svc:9000
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            directory: {directory}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            filename: {filename}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            filetype:{" "}
+            <Select
+              value={filetype}
+              onChange={(e) => setFiletype(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              size="small"
+              sx={{ marginLeft: "20px" }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="csv">CSV</MenuItem>
+              <MenuItem value="xls">EXCEL</MenuItem>
+              <MenuItem value="txt">TSV</MenuItem>
+            </Select>
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            write table:{" "}
+            <Select
+              value={writeTable}
+              onChange={(e) => setWriteTable(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              size="small"
+              sx={{ marginLeft: "20px" }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {writeTables.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </Typography>
+
           {filetype === "xls" ? (
             <TextField
               id="sheetName"
-              label="SheetName"
+              label="Sheet Name"
               variant="standard"
               defaultValue={sheetName}
-              onChange={(e) => {
-                setSheetName(e.target.value);
-                setIsConnected(1);
-              }}
+              onChange={(e) => setSheetName(e.target.value)}
             />
-          ) : null}
+          ) : (
+            <TextField
+              id="sheetName"
+              label="Sheet Name"
+              variant="standard"
+              disabled
+              defaultValue={sheetName}
+            />
+          )}
           <br />
-          {writeTable !== "" ? (
-            <Button onClick={handleSubmit}>Submit</Button>
-          ) : null}
+          {writeTable !== "" && !submitted ? (
+            <Button fullWidth onClick={handleSubmit}>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          ) : (
+            <Button disabled fullWidth>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          )}
         </>
       ) : null}
+      <Snackbar open={snackbarStatus}>{alert}</Snackbar>
     </>
   );
 }

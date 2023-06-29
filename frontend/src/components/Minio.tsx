@@ -1,5 +1,17 @@
-import { Button, Link, MenuItem, Select, TextField } from "@mui/material";
-import { useState } from "react";
+import {
+  Alert,
+  Button,
+  FormControl,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Fragment, useState } from "react";
 
 const writeTables = [
   "物流公司",
@@ -20,10 +32,41 @@ export default function Minio() {
   const [writeTable, setWriteTable] = useState("");
   const [sheetName, setSheetName] = useState("");
 
-  const [page, setPage] = useState(["Minio Input"]);
   const [isConnected, setIsConnected] = useState(1);
   const [buckets, setBuckets] = useState([]);
   const [files, setFiles] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(
+    <LinearProgress variant="determinate" value={0} />
+  );
+  const [snackbarStatus, setSnackbarStatus] = useState(false);
+  const action = (
+    <Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        onClick={() => setSnackbarStatus(false)}
+      >
+        <img src="/exit.png" style={{ height: 15 }}></img>
+      </IconButton>
+    </Fragment>
+  );
+  const action2 = (
+    <Fragment>
+      <Button color="warning" href="/">
+        处理
+      </Button>
+      <IconButton
+        size="small"
+        aria-label="close"
+        onClick={() => setSnackbarStatus(false)}
+      >
+        <img src="/exit.png" style={{ height: 15 }}></img>
+      </IconButton>
+    </Fragment>
+  );
+  const [alert, setAlert] = useState(<></>);
+  const [submitted, setSubmitted] = useState(false);
 
   function handleTest() {
     const requestOptions = {
@@ -43,10 +86,20 @@ export default function Minio() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setIsConnected(data.status);
+        setSnackbarStatus(true);
         if (data.status === 0) {
-          setIsConnected(0);
+          setAlert(
+            <Alert severity="success" action={action}>
+              数据库连接成功！
+            </Alert>
+          );
         } else {
-          setIsConnected(1);
+          setAlert(
+            <Alert severity="error" action={action}>
+              数据库连接失败
+            </Alert>
+          );
         }
       });
   }
@@ -61,20 +114,25 @@ export default function Minio() {
       }),
     };
     console.log(requestOptions);
-    fetch("http://36.140.31.145:31810/minio_input/get_buckets", requestOptions)
+    fetch("http://36.140.31.145:31810/minio_input/get_buckets/", requestOptions)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
         if (data.status === 0) {
           setBuckets(data.buckets);
-          setPage(page.concat(["Buckets"]));
+          setPage(2);
         } else {
-          setBuckets([]);
+          setSnackbarStatus(true);
+          setAlert(
+            <Alert severity="error" action={action}>
+              数据库连接失败
+            </Alert>
+          );
         }
       });
   }
-  function handleUseBucket(e: React.MouseEvent) {
-    setBucket(e.currentTarget.id);
+  function handleUseBucket(e: SelectChangeEvent) {
+    setBucket(e.target.value);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -82,27 +140,24 @@ export default function Minio() {
         endpoint: endpoint,
         accesskey: accessKey,
         secretkey: secretKey,
-        bucket: e.currentTarget.id,
+        bucket: e.target.value,
       }),
     };
     console.log(requestOptions);
-    fetch("http://36.140.31.145:31810/minio_input/get_files", requestOptions)
+    fetch("http://36.140.31.145:31810/minio_input/get_files/", requestOptions)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
         if (data.status === 0) {
           setFiles(data.objects);
-          setPage(page.concat(["Files"]));
         } else {
           setFiles([]);
         }
       });
   }
-  function handleUseFile(e: React.MouseEvent) {
-    setDirectory(e.currentTarget.id);
-    setPage(page.concat(["Configurations"]));
-  }
-  function handleSubmit(e: React.MouseEvent) {
+  function handleSubmit() {
+    setLoading(<LinearProgress />);
+    setSubmitted(true);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -125,42 +180,44 @@ export default function Minio() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setLoading(<LinearProgress variant="determinate" value={100} />);
+        setSnackbarStatus(true);
+        if (data.status === 0) {
+          setAlert(
+            <Alert severity="success" action={action}>
+              数据导入成功！
+            </Alert>
+          );
+        } else if (data.status <= 0) {
+          setAlert(
+            <Alert severity="error" action={action}>
+              数据导入出错！
+            </Alert>
+          );
+        } else {
+          setAlert(
+            <Alert severity="warning" action={action2}>
+              存在 {data.status} 条异常数据！
+            </Alert>
+          );
+        }
       });
   }
-  function handlePageChange(e: MouseEvent) {
-    let tmp = [];
-    for (let i in page) {
-      tmp.push(page[i]);
-      if (page[i] === e.currentTarget.id) {
-        break;
-      }
-    }
-    setPage(tmp);
-  }
+
   return (
     <>
-      <a href="/">Menu</a>
-      {" / "}
-      {page.map((item, index) => (
+      <Typography variant="h6" sx={{ margin: "10px 0" }} align="right">
+        MinIO 数据导入
+      </Typography>
+      {loading}
+      {page === 1 ? (
         <>
-          <Link
-            id={item}
-            underline="hover"
-            color="inherit"
-            onClick={handlePageChange}
-          >
-            {item}
-          </Link>
-          {" / "}
-        </>
-      ))}
-      {page.length === 1 ? (
-        <>
-          <h1>MinIO Input</h1>
           <TextField
             id="endpoint"
             label="Endpoint"
             variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
             defaultValue={endpoint}
             onChange={(e) => {
               setEndpoint(e.target.value);
@@ -172,6 +229,8 @@ export default function Minio() {
             id="accessKey"
             label="AccessKey"
             variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
             defaultValue={accessKey}
             onChange={(e) => {
               setAccessKey(e.target.value);
@@ -183,6 +242,8 @@ export default function Minio() {
             id="secretKey"
             label="SecretKey"
             variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
             defaultValue={secretKey}
             onChange={(e) => {
               setSecretKey(e.target.value);
@@ -190,99 +251,159 @@ export default function Minio() {
             }}
           />
           <br />
-          <Button onClick={handleTest}>Test Connection</Button>
+          <Button fullWidth onClick={handleTest}>
+            <Typography variant="h6">测试连接</Typography>
+          </Button>
           <br />
           {isConnected === 0 ? (
-            <Button onClick={handleConnect}>Connect</Button>
+            <Button fullWidth onClick={handleConnect}>
+              <Typography variant="h6">连接 MinIO</Typography>
+            </Button>
           ) : (
-            <Button disabled>Connect</Button>
+            <Button fullWidth disabled>
+              <Typography variant="h6">连接 MinIO</Typography>
+            </Button>
           )}
           <br />
         </>
       ) : null}
-      {page.length === 2 && buckets.length !== 0 ? (
+      {page === 2 && buckets.length !== 0 ? (
         <>
-          <h2>Buckets</h2>
-          <ul>
-            {buckets.map((item, index) => (
-              <li key={index}>
-                <Button id={item} onClick={handleUseBucket}>
-                  {item}
-                </Button>
-              </li>
-            ))}
-          </ul>
+          <FormControl fullWidth>
+            <Select
+              value={bucket}
+              onChange={handleUseBucket}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              sx={{ margin: "5px 0" }}
+            >
+              <MenuItem value="">
+                <em>选择 Bucket</em>
+              </MenuItem>
+              {buckets.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <Select
+              value={directory}
+              onChange={(e) => setDirectory(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              sx={{ margin: "5px 0" }}
+            >
+              <MenuItem value="">
+                <em>选择文件</em>
+              </MenuItem>
+              {files.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {directory !== "" && bucket !== "" ? (
+            <Button
+              fullWidth
+              onClick={() => {
+                setPage(3);
+              }}
+            >
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          ) : (
+            <Button disabled fullWidth>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          )}
         </>
       ) : null}
-      {page.length === 3 && files.length !== 0 ? (
+      {page === 3 ? (
         <>
-          <h2>{bucket}</h2>
-          <ul>
-            {files.map((item, index) => (
-              <li key={index}>
-                <Button id={item} onClick={handleUseFile}>
-                  {item}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-      {page.length === 4 ? (
-        <>
-          <h2>
-            {bucket}
-            {" -> "}
-            {directory}
-          </h2>
-          <Select
-            value={filetype}
-            onChange={(e) => setFiletype(e.target.value)}
-            displayEmpty
-            inputProps={{ "aria-label": "Without label" }}
-            size="small"
-          >
-            <MenuItem value="">
-              <em>Filetype</em>
-            </MenuItem>
-            <MenuItem value="csv">CSV</MenuItem>
-            <MenuItem value="xls">EXCEL</MenuItem>
-            <MenuItem value="txt">TSV</MenuItem>
-          </Select>
-          <br />
-          <Select
-            value={writeTable}
-            onChange={(e) => setWriteTable(e.target.value)}
-            displayEmpty
-            inputProps={{ "aria-label": "Without label" }}
-            size="small"
-          >
-            <MenuItem value="">
-              <em>Write Table</em>
-            </MenuItem>
-            {writeTables.map((item) => (
-              <MenuItem value={item}>{item}</MenuItem>
-            ))}
-          </Select>
-          <br />
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            endpoint: {endpoint}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            access key: {accessKey}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            secret key: {secretKey}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            bucket: {bucket}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            directory: {directory}
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            write table:{" "}
+            <Select
+              value={writeTable}
+              onChange={(e) => setWriteTable(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              size="small"
+              sx={{ marginLeft: "20px" }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {writeTables.map((item) => (
+                <MenuItem value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </Typography>
+          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
+            file type:{" "}
+            <Select
+              value={filetype}
+              onChange={(e) => setFiletype(e.target.value)}
+              displayEmpty
+              inputProps={{ "aria-label": "Without label" }}
+              size="small"
+              sx={{ marginLeft: "20px" }}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="csv">CSV</MenuItem>
+              <MenuItem value="xls">EXCEL</MenuItem>
+              <MenuItem value="txt">TSV</MenuItem>
+            </Select>
+          </Typography>
+          <Typography
+            variant="button"
+            sx={{ fontSize: 18, display: "flex" }}
+          ></Typography>
           {filetype === "xls" ? (
             <TextField
               id="sheetName"
-              label="SheetName"
+              label="Sheet Name"
               variant="standard"
               defaultValue={sheetName}
-              onChange={(e) => {
-                setSheetName(e.target.value);
-                setIsConnected(1);
-              }}
+              onChange={(e) => setSheetName(e.target.value)}
             />
-          ) : null}
+          ) : (
+            <TextField
+              id="sheetName"
+              label="Sheet Name"
+              variant="standard"
+              disabled
+              defaultValue={sheetName}
+            />
+          )}
           <br />
-          {writeTable !== "" ? (
-            <Button onClick={handleSubmit}>Submit</Button>
-          ) : null}
+          {writeTable !== "" && !submitted ? (
+            <Button fullWidth onClick={handleSubmit}>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          ) : (
+            <Button disabled fullWidth>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          )}
         </>
       ) : null}
+      <Snackbar open={snackbarStatus}>{alert}</Snackbar>
     </>
   );
 }
