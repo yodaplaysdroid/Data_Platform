@@ -1,7 +1,7 @@
 from minio import Minio
 import pandas as pd
 import dmPython
-import datetime
+from datetime import datetime
 
 
 # MinIO 类
@@ -114,6 +114,60 @@ class Minio_Input:
             return False
         return True
 
+    def get_columns(
+        self,
+        bucket: str,
+        directory: str,
+        filetype: str,
+        sheet_name="",
+    ) -> dict:
+        res = {}
+        if self.test_connection()["status"] != 0:
+            res["status"] = -1
+
+        try:
+            self.conn.fget_object(bucket, directory, "/tmp/minio")
+        except Exception as e:
+            print(e)
+            res["status"] = -2
+            return res
+
+        # 加载文件为 pandas dataframe 对象
+        if filetype == "csv":
+            try:
+                df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'")
+            except Exception as e:
+                try:
+                    df = pd.read_csv("/tmp/minio", encoding="utf-8", quotechar="'")
+                except Exception as f:
+                    print(f)
+                    print("File Reading Error", e)
+                    res["status"] = -2
+                    return res
+        elif filetype == "txt":
+            try:
+                df = pd.read_csv("/tmp/minio", sep="\t", encoding="gbk", quotechar="'")
+            except Exception as e:
+                try:
+                    df = pd.read_csv(
+                        "/tmp/minio", sep="\t", encoding="utf-8", quotechar="'"
+                    )
+                except Exception as f:
+                    print(f)
+                    print("File Reading Error", e)
+                    res["status"] = -2
+                    return res
+        else:
+            try:
+                df = pd.read_excel("/tmp/minio", sheet_name=sheet_name)
+            except Exception as e:
+                print("File Reading Error", e)
+                res["status"] = -2
+                return res
+
+        res["columns1"] = df.columns.to_list()
+        return res
+
     # 采取数据
     # status: 0 -> 成功
     # status: -1 -> 连接失败
@@ -134,8 +188,8 @@ class Minio_Input:
 
         try:
             dm = dmPython.connect(
-                user="test",
-                password="Owkl.9130",
+                user="weiyin",
+                password="lamweiyin",
                 server="36.140.31.145",
                 port="31826",
                 autoCommit=True,
@@ -159,23 +213,25 @@ class Minio_Input:
                 df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'")
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/minio", quotechar="'")
+                    df = pd.read_csv("/tmp/minio", encoding="utf-8", quotechar="'")
                 except Exception as f:
                     print(f)
-                print("File Reading Error", e)
-                res["status"] = -2
-                return res
+                    print("File Reading Error", e)
+                    res["status"] = -2
+                    return res
         elif filetype == "txt":
             try:
                 df = pd.read_csv("/tmp/minio", sep="\t", encoding="gbk", quotechar="'")
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/minio", sep="\t", quotechar="'")
+                    df = pd.read_csv(
+                        "/tmp/minio", sep="\t", encoding="utf-8", quotechar="'"
+                    )
                 except Exception as f:
                     print(f)
-                print("File Reading Error", e)
-                res["status"] = -2
-                return res
+                    print("File Reading Error", e)
+                    res["status"] = -2
+                    return res
         else:
             try:
                 df = pd.read_excel("/tmp/minio", sheet_name=sheet_name)

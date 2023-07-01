@@ -5,8 +5,8 @@ import dmPython
 class Dameng:
     def __init__(
         self,
-        username="test",
-        password="Owkl.9130",
+        username="weiyin",
+        password="lamweiyin",
         server="36.140.31.145",
         port="31826",
     ) -> None:
@@ -39,22 +39,17 @@ class Dameng:
     # status: 0 -> 采取成功
     # status: -1 -> 连接失败
     # status: -2 -> 表不存在
-    def get_tmp(self, table: str) -> dict:
+    def get_tmp(self, table: str, start_point: int) -> dict:
         res = {}
         if self.connect() == 0:
             try:
-                self.cursor.execute(f"select * from {table}tmp limit 50")
+                self.cursor.execute(
+                    f"select * from {table}tmp where id >= {start_point} limit 50"
+                )
                 results = self.cursor.fetchall()
-                res["errors"] = {}
+                res["errors"] = []
                 for result in results:
-                    try:
-                        res["errors"][result[-2]].append(
-                            [result[-1], list(result[:-2])]
-                        )
-                    except:
-                        res["errors"][result[-2]] = [
-                            [result[-1], list(result[:-2])],
-                        ]
+                    res["errors"].append(list(result))
                 res["status"] = 0
             except Exception as e:
                 print(e)

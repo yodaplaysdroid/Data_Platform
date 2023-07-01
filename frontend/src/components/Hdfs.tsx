@@ -1,6 +1,9 @@
 import {
   Alert,
   Button,
+  Card,
+  CardContent,
+  Container,
   FormControl,
   IconButton,
   LinearProgress,
@@ -31,6 +34,7 @@ export default function Hdfs() {
   const [isConnected, setIsConnected] = useState(1);
   const [files, setFiles] = useState([]);
   const [page, setPage] = useState(1);
+  const [columns, setColumns] = useState<any[]>([]);
   const [loading, setLoading] = useState(
     <LinearProgress variant="determinate" value={0} />
   );
@@ -48,8 +52,8 @@ export default function Hdfs() {
   );
   const action2 = (
     <Fragment>
-      <Button color="warning" href="/">
-        处理
+      <Button color="warning" href={`/fix/${writeTable}`}>
+        查看错误数据
       </Button>
       <IconButton
         size="small"
@@ -73,7 +77,7 @@ export default function Hdfs() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31810/hdfs_input/test_connection/",
+      "http://36.140.31.145:31684/hdfs_input/test_connection/",
       requestOptions
     )
       .then((response) => response.json())
@@ -97,7 +101,28 @@ export default function Hdfs() {
         }
       });
   }
-
+  function handleConfirm() {
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        directory: directory,
+        filename: filename,
+        filetype: filetype,
+        writetable: writeTable,
+        sheetname: sheetName,
+      }),
+    };
+    console.log(requestOptions);
+    fetch("http://36.140.31.145:31684/hdfs_input/get_columns/", requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        let tmp = [data.columns1, data.columns2];
+        setColumns(tmp);
+        setPage(4);
+      });
+  }
   function handleSubmit() {
     setLoading(<LinearProgress />);
     setSubmitted(true);
@@ -114,7 +139,7 @@ export default function Hdfs() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31810/hdfs_input/data_transfer/",
+      "http://36.140.31.145:31684/hdfs_input/data_transfer/",
       requestOptions
     )
       .then((response) => response.json())
@@ -130,7 +155,7 @@ export default function Hdfs() {
           );
         } else if (data.status <= 0) {
           setAlert(
-            <Alert severity="error" action={action}>
+            <Alert severity="error" action={action2}>
               数据导入出错！
             </Alert>
           );
@@ -294,14 +319,52 @@ export default function Hdfs() {
           )}
           <br />
           {writeTable !== "" && !submitted ? (
-            <Button fullWidth onClick={handleSubmit}>
-              <Typography variant="h6">提交</Typography>
+            <Button fullWidth onClick={handleConfirm}>
+              <Typography variant="h6">确定</Typography>
             </Button>
           ) : (
             <Button disabled fullWidth>
-              <Typography variant="h6">提交</Typography>
+              <Typography variant="h6">确定</Typography>
             </Button>
           )}
+        </>
+      ) : null}
+      {page === 4 ? (
+        <>
+          <Container
+            sx={{
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+              marginTop: 5,
+              marginBottom: 5,
+            }}
+          >
+            <Card id="columns1" sx={{ width: 250 }}>
+              <CardContent>
+                <Typography gutterBottom variant="h6" component="div">
+                  源数据表
+                </Typography>
+                {columns[0].map((item: string) => (
+                  <MenuItem value={item}>{item}</MenuItem>
+                ))}
+              </CardContent>
+            </Card>
+            <Card id="columns1" sx={{ width: 250 }}>
+              <CardContent>
+                <Typography gutterBottom variant="h6" component="div">
+                  目标数据表
+                </Typography>
+                {columns[1].map((item: string) => (
+                  <MenuItem value={item}>{item}</MenuItem>
+                ))}
+              </CardContent>
+            </Card>
+          </Container>
+
+          <Button fullWidth onClick={handleSubmit}>
+            <Typography variant="h6">提交</Typography>
+          </Button>
         </>
       ) : null}
       <Snackbar open={snackbarStatus}>{alert}</Snackbar>

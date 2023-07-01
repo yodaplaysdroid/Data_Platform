@@ -9,10 +9,16 @@ import {
   Box,
   Button,
   IconButton,
+  MenuItem,
+  Modal,
+  Select,
   Toolbar,
   Typography,
 } from "@mui/material";
 import Home from "./components/Home";
+import Fix from "./components/Fix";
+import { useState } from "react";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 
 export default function App() {
   return (
@@ -28,17 +34,49 @@ export default function App() {
               sx={{ mr: 2 }}
               href="/"
             >
-              <img src="/menu.png" style={{ height: 30, width: 30 }}></img>
+              <HomeRoundedIcon />
             </IconButton>
+            <img
+              src="/icon.png"
+              style={{ marginLeft: 10, marginRight: 5, height: 30, width: 30 }}
+            ></img>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               物流数据平台
             </Typography>
             <div>
+              <Select
+                value=""
+                displayEmpty
+                inputProps={{ "aria-label": "Without label" }}
+                size="small"
+                sx={{ color: "aliceblue" }}
+              >
+                <MenuItem value="">
+                  <em>选择表格</em>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/物流公司">物流公司</Button>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/客户信息">客户信息</Button>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/物流信息">物流信息</Button>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/集装箱动态">集装箱动态</Button>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/装货表">装货表</Button>
+                </MenuItem>
+                <MenuItem>
+                  <Button href="/fix/卸货表">卸货表</Button>
+                </MenuItem>
+              </Select>
               <Button color="inherit" href="/input/">
                 数据导入
               </Button>
               <Button color="inherit">文档手册</Button>
-              <Button color="inherit">登录 / 注册</Button>
             </div>
           </Toolbar>
         </AppBar>
@@ -83,6 +121,14 @@ export default function App() {
               element={
                 <>
                   <Hdfs />
+                </>
+              }
+            />
+            <Route
+              path="/fix/:table"
+              element={
+                <>
+                  <Fix />
                 </>
               }
             />

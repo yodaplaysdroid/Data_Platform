@@ -41,7 +41,7 @@ export default function Menu() {
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 A relational database management system (RDBMS) developed by
-                Oracle that is based on structured query language (SQL).
+                Oracle that is based on SQL.
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -94,6 +94,7 @@ export default function Menu() {
               border: "2px solid #000",
               boxShadow: 24,
               p: 4,
+              overflow: "scroll",
             }}
           >
             {fs === "mysql" ? <Mysql /> : null}

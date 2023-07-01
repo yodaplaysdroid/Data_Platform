@@ -15,6 +15,7 @@ WORKDIR /app
 # 环境语言设置（为了支持 gbk enconding）
 RUN apt update
 RUN apt install language-pack-zh-hans -y
+RUN apt install vim -y
 
 # 安装 rclone （hdfs 接口）
 COPY ./resources/rclone-v1.62.2-linux-amd64.deb /

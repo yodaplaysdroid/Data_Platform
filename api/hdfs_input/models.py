@@ -1,6 +1,6 @@
 import dmPython
 import os
-import datetime
+from datetime import datetime
 import pandas as pd
 import subprocess
 
@@ -56,7 +56,7 @@ class HDFS:
         city = list(range(1, 100))
 
         # 验证校验码是否正确
-        def verify(id: str):
+        def verify(self, id: str):
             sum = 0
             wi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
             for i in range(17):
@@ -89,6 +89,49 @@ class HDFS:
             return False
         return True
 
+    def get_columns(self, filetype: str, filename: str, sheet_name="") -> dict:
+        res = {}
+        try:
+            os.system(f"rclone copy {self.directory}{filename} /tmp")
+            os.system(f"mv /tmp/{filename} /tmp/hdfs")
+        except Exception as e:
+            print("Connection Error / File Not Found:", e)
+            res["status"] = -1
+            return res
+
+        # 加载文件为 pandas dataframe 对象
+        if filetype == "csv":
+            try:
+                df = pd.read_csv("/tmp/hdfs", encoding="gbk", quotechar="'")
+            except Exception as e:
+                try:
+                    df = pd.read_csv("/tmp/hdfs", quotechar="'")
+                except Exception as f:
+                    print(f)
+                print("File Reading Error", e)
+                res["status"] = -2
+                return res
+        elif filetype == "txt":
+            try:
+                df = pd.read_csv("/tmp/hdfs", sep="\t", encoding="gbk", quotechar="'")
+            except Exception as e:
+                try:
+                    df = pd.read_csv("/tmp/hdfs", sep="\t", quotechar="'")
+                except Exception as f:
+                    print(f)
+                print("File Reading Error", e)
+                res["status"] = -2
+                return res
+        else:
+            try:
+                df = pd.read_excel("/tmp/hdfs", sheet_name=sheet_name)
+            except Exception as e:
+                print("File Reading Error", e)
+                res["status"] = -2
+                return res
+        res["columns1"] = df.columns.to_list()
+        return res
+
     # 数据导入从 HDFS 存储到达梦数据库
     # status: -1 -> 链接事故
     # status: -2 -> 文件格式出错/无法读取文件/ excel 页名不对
@@ -107,8 +150,8 @@ class HDFS:
 
         try:
             dm = dmPython.connect(
-                user="test",
-                password="Owkl.9130",
+                user="weiyin",
+                password="lamweiyin",
                 server="36.140.31.145",
                 port="31826",
                 autoCommit=True,

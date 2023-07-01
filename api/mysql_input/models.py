@@ -1,6 +1,6 @@
 import mysql.connector
 import dmPython
-import datetime
+from datetime import datetime
 
 
 # Mysql 类
@@ -110,7 +110,7 @@ class Mysql_Input:
         city = list(range(1, 100))
 
         # 验证校验码是否正确
-        def verify(id):
+        def verify(self, id: str):
             sum = 0
             wi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
             for i in range(17):
@@ -143,6 +143,28 @@ class Mysql_Input:
             return False
         return True
 
+    def get_columns(self, database: str, read_table: str) -> dict:
+        res = {}
+        if self.test_connection()["status"] != 0:
+            res["status"] = -1
+        else:
+            # 连接 Mysql 数据库
+            connection = mysql.connector.connect(
+                user=self.username,
+                password=self.password,
+                host=self.host,
+                database=database,
+            )
+            cursor = connection.cursor()
+
+            try:
+                cursor.execute(f"show columns from {read_table}")
+                results = cursor.fetchall()
+                res["columns1"] = [result[0] for result in results]
+            except Exception as e:
+                res["status"] = -2
+        return res
+
     # 从 Mysql 提取表数据并迁移至达梦数据库
     # status: 0 -> 过程成功执行
     # status: -10 -> 连接不上达梦数据库
@@ -156,8 +178,8 @@ class Mysql_Input:
             # 连接达梦数据库
             try:
                 dm = dmPython.connect(
-                    user="test",
-                    password="Owkl.9130",
+                    user="weiyin",
+                    password="lamweiyin",
                     server="36.140.31.145",
                     port="31826",
                     autoCommit=True,

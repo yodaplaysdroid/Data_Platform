@@ -10,6 +10,11 @@ import {
   Snackbar,
   IconButton,
   Alert,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  Container,
 } from "@mui/material";
 import { Fragment, useState } from "react";
 
@@ -34,6 +39,7 @@ export default function Mysql() {
   const [databases, setDatabases] = useState([]);
   const [tables, setTables] = useState([]);
   const [page, setPage] = useState(1);
+  const [columns, setColumns] = useState<any[]>([]);
   const [loading, setLoading] = useState(
     <LinearProgress variant="determinate" value={0} />
   );
@@ -51,8 +57,8 @@ export default function Mysql() {
   );
   const action2 = (
     <Fragment>
-      <Button color="warning" href="/">
-        处理
+      <Button color="warning" href={`/fix/${writeTable}`}>
+        查看错误数据
       </Button>
       <IconButton
         size="small"
@@ -78,7 +84,7 @@ export default function Mysql() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31810/mysql_input/test_connection/",
+      "http://36.140.31.145:31684/mysql_input/test_connection/",
       requestOptions
     )
       .then((response) => response.json())
@@ -114,7 +120,7 @@ export default function Mysql() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31810/mysql_input/get_databases/",
+      "http://36.140.31.145:31684/mysql_input/get_databases/",
       requestOptions
     )
       .then((response) => response.json())
@@ -148,7 +154,7 @@ export default function Mysql() {
       }),
     };
     console.log(requestOptions);
-    fetch("http://36.140.31.145:31810/mysql_input/get_tables/", requestOptions)
+    fetch("http://36.140.31.145:31684/mysql_input/get_tables/", requestOptions)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -157,6 +163,29 @@ export default function Mysql() {
         } else {
           setTables([]);
         }
+      });
+  }
+  function handleConfirm() {
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        host: host,
+        database: database,
+        readtable: readTable,
+        writetable: writeTable,
+      }),
+    };
+    console.log(requestOptions);
+    fetch("http://36.140.31.145:31684/mysql_input/get_columns/", requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        let tmp = [data.columns1, data.columns2];
+        setColumns(tmp);
+        setPage(4);
       });
   }
   function handleSubmit() {
@@ -176,7 +205,7 @@ export default function Mysql() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31810/mysql_input/data_transfer/",
+      "http://36.140.31.145:31684/mysql_input/data_transfer/",
       requestOptions
     )
       .then((response) => response.json())
@@ -192,7 +221,7 @@ export default function Mysql() {
           );
         } else if (data.status <= 0) {
           setAlert(
-            <Alert severity="error" action={action}>
+            <Alert severity="error" action={action2}>
               数据导入出错！
             </Alert>
           );
@@ -368,14 +397,52 @@ export default function Mysql() {
           </Typography>
           <br />
           {writeTable !== "" && !submitted ? (
-            <Button fullWidth onClick={handleSubmit}>
-              <Typography variant="h6">提交</Typography>
+            <Button fullWidth onClick={handleConfirm}>
+              <Typography variant="h6">确定</Typography>
             </Button>
           ) : (
             <Button disabled fullWidth>
-              <Typography variant="h6">提交</Typography>
+              <Typography variant="h6">确定</Typography>
             </Button>
           )}
+        </>
+      ) : null}
+      {page === 4 ? (
+        <>
+          <Container
+            sx={{
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+              marginTop: 5,
+              marginBottom: 5,
+            }}
+          >
+            <Card id="columns1" sx={{ width: 250 }}>
+              <CardContent>
+                <Typography gutterBottom variant="h6" component="div">
+                  源数据表
+                </Typography>
+                {columns[0].map((item: string) => (
+                  <MenuItem value={item}>{item}</MenuItem>
+                ))}
+              </CardContent>
+            </Card>
+            <Card id="columns1" sx={{ width: 250 }}>
+              <CardContent>
+                <Typography gutterBottom variant="h6" component="div">
+                  目标数据表
+                </Typography>
+                {columns[1].map((item: string) => (
+                  <MenuItem value={item}>{item}</MenuItem>
+                ))}
+              </CardContent>
+            </Card>
+          </Container>
+
+          <Button fullWidth onClick={handleSubmit}>
+            <Typography variant="h6">提交</Typography>
+          </Button>
         </>
       ) : null}
       <Snackbar open={snackbarStatus}>{alert}</Snackbar>

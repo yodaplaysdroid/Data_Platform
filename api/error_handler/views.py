@@ -12,9 +12,10 @@ def get_tmp(request):
     if request.method == "POST":
         data = json.loads(request.body)
         table_name = data.get("tablename")
+        start_point = data.get("startpoint")
 
         dm = Dameng()
-        res = dm.get_tmp(table_name)
+        res = dm.get_tmp(table_name, start_point)
 
         return JsonResponse(res)
 
