@@ -137,7 +137,12 @@ class HDFS:
     # status: -2 -> 文件格式出错/无法读取文件/ excel 页名不对
     # status: -10 -> 达梦链接不上
     def extract(
-        self, filetype: str, filename: str, write_table: str, sheet_name=""
+        self,
+        filetype: str,
+        filename: str,
+        write_table: str,
+        delete_columns: list,
+        sheet_name="",
     ) -> dict:
         res = {}
         try:
@@ -167,10 +172,14 @@ class HDFS:
         # 加载文件为 pandas dataframe 对象
         if filetype == "csv":
             try:
-                df = pd.read_csv("/tmp/hdfs", encoding="gbk", quotechar="'")
+                df = pd.read_csv("/tmp/hdfs", encoding="gbk", quotechar="'").drop(
+                    columns=delete_columns
+                )
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", quotechar="'")
+                    df = pd.read_csv("/tmp/hdfs", quotechar="'").drop(
+                        columns=delete_columns
+                    )
                 except Exception as f:
                     print(f)
                 print("File Reading Error", e)
@@ -178,10 +187,14 @@ class HDFS:
                 return res
         elif filetype == "txt":
             try:
-                df = pd.read_csv("/tmp/hdfs", sep="\t", encoding="gbk", quotechar="'")
+                df = pd.read_csv(
+                    "/tmp/hdfs", sep="\t", encoding="gbk", quotechar="'"
+                ).drop(columns=delete_columns)
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", sep="\t", quotechar="'")
+                    df = pd.read_csv("/tmp/hdfs", sep="\t", quotechar="'").drop(
+                        columns=delete_columns
+                    )
                 except Exception as f:
                     print(f)
                 print("File Reading Error", e)
@@ -189,7 +202,9 @@ class HDFS:
                 return res
         else:
             try:
-                df = pd.read_excel("/tmp/hdfs", sheet_name=sheet_name)
+                df = pd.read_excel("/tmp/hdfs", sheet_name=sheet_name).drop(
+                    columns=delete_columns
+                )
             except Exception as e:
                 print("File Reading Error", e)
                 res["status"] = -2

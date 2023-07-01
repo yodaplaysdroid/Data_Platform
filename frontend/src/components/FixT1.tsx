@@ -22,6 +22,7 @@ import {
   Switch,
 } from "@mui/material";
 import { useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 export default function FixT1() {
   const data = JSON.parse(localStorage.getItem("t"));
@@ -236,10 +237,36 @@ export default function FixT1() {
 
   interface EnhancedTableToolbarProps {
     numSelected: number;
+    selectedItems: string[];
   }
-
+  const [isLoading, setIsLoading] = useState(<></>);
   function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const { numSelected } = props;
+    const { numSelected, selectedItems } = props;
+
+    function handleDelete(e: any) {
+      setIsLoading(<CircularProgress />);
+      console.log(e);
+      console.log(selectedItems);
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tablename: "物流公司",
+          itemstodelete: selectedItems,
+        }),
+      };
+      console.log(requestOptions);
+      fetch(
+        "http://36.140.31.145:31684/error_handler/delete_errors/",
+        requestOptions
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          setIsLoading(<></>);
+          window.location.reload();
+        });
+    }
 
     return (
       <Toolbar
@@ -275,11 +302,14 @@ export default function FixT1() {
           </Typography>
         )}
         {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <>
+            {isLoading}
+            <Tooltip title="Delete" onClick={handleDelete}>
+              <IconButton>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </>
         ) : (
           <Tooltip title="Filter list">
             <IconButton>
@@ -369,7 +399,10 @@ export default function FixT1() {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          selectedItems={selected}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

@@ -1,52 +1,52 @@
-import { Container } from "@mui/material";
+import * as React from "react";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import { useState } from "react";
+import { Button } from "@mui/material";
 
 export default function Home() {
+  const columns = [
+    ["客户名称", "客户编号", "手机号", "省市区"],
+    ["客户名称", "客户编号", "手机号", "省市区"],
+  ];
+  const [checked, setChecked] = useState(Array(columns[0].length).fill(1));
+  function handleChange(e: any) {
+    console.log(e.target.id);
+    let tmp = checked;
+    tmp[Number(e.target.id)] === 0
+      ? (tmp[Number(e.target.id)] = 1)
+      : (tmp[Number(e.target.id)] = 0);
+    setChecked(tmp);
+    console.log(checked);
+  }
+  function handleSubmit() {
+    let tmp: string[] = [];
+    for (let c in checked) {
+      if (checked[c] === 0) {
+        tmp.push(columns[0][c]);
+      }
+    }
+    console.log(tmp);
+  }
+
   return (
     <>
-      <Container sx={{ alignItems: "center", justifyContent: "center" }}>
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670041998813306881&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670113882892410881&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670457086149926913&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670126477594599425&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670663863973978113&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-        <iframe
-          src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670137009093484545&isTemplate=0"
-          width="1281"
-          height="720"
-          frameBorder="0"
-        ></iframe>
-        <br />
-      </Container>
+      <FormGroup>
+        {columns[0].map((item: string, index) => (
+          <FormControlLabel
+            control={
+              <Checkbox
+                defaultChecked
+                id={index.toString()}
+                onChange={handleChange}
+              />
+            }
+            label={item}
+          />
+        ))}
+      </FormGroup>
+      <Button onClick={handleSubmit}>submit</Button>
     </>
   );
 }

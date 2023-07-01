@@ -10,14 +10,12 @@ import {
   Button,
   IconButton,
   MenuItem,
-  Modal,
   Select,
   Toolbar,
   Typography,
 } from "@mui/material";
 import Home from "./components/Home";
 import Fix from "./components/Fix";
-import { useState } from "react";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 
 export default function App() {

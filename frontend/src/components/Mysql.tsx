@@ -11,10 +11,11 @@ import {
   IconButton,
   Alert,
   Card,
-  CardActionArea,
   CardContent,
-  CardMedia,
   Container,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
 } from "@mui/material";
 import { Fragment, useState } from "react";
 
@@ -40,6 +41,8 @@ export default function Mysql() {
   const [tables, setTables] = useState([]);
   const [page, setPage] = useState(1);
   const [columns, setColumns] = useState<any[]>([]);
+  const [checked, setChecked] = useState<number[]>([]);
+  const [countones, setCountones] = useState(0);
   const [loading, setLoading] = useState(
     <LinearProgress variant="determinate" value={0} />
   );
@@ -185,12 +188,37 @@ export default function Mysql() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
+        setChecked(Array(tmp[0].length).fill(1));
+        setCountones(tmp.length);
         setPage(4);
       });
+  }
+  function handleChange(e: any) {
+    console.log(e.target.id);
+    let tmp = checked;
+    tmp[Number(e.target.id)] === 0
+      ? (tmp[Number(e.target.id)] = 1)
+      : (tmp[Number(e.target.id)] = 0);
+    setChecked(tmp);
+    const countOnes = checked.reduce((count, element) => {
+      if (element === 1) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+    setCountones(countOnes);
+    console.log(checked, countOnes);
   }
   function handleSubmit() {
     setLoading(<LinearProgress />);
     setSubmitted(true);
+    let selectColumns: string[] = [];
+    for (let c in checked) {
+      if (checked[c] === 1) {
+        selectColumns.push(columns[0][c]);
+      }
+    }
+    console.log(selectColumns);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -201,6 +229,7 @@ export default function Mysql() {
         database: database,
         readtable: readTable,
         writetable: writeTable,
+        selectcolumns: selectColumns,
       }),
     };
     console.log(requestOptions);
@@ -423,9 +452,21 @@ export default function Mysql() {
                 <Typography gutterBottom variant="h6" component="div">
                   源数据表
                 </Typography>
-                {columns[0].map((item: string) => (
-                  <MenuItem value={item}>{item}</MenuItem>
-                ))}
+                <FormGroup>
+                  {columns[0].map((item: string, index: number) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          defaultChecked
+                          id={index.toString()}
+                          onChange={handleChange}
+                        />
+                      }
+                      label={item}
+                    />
+                  ))}
+                </FormGroup>
+                <Button onClick={handleSubmit}>submit</Button>
               </CardContent>
             </Card>
             <Card id="columns1" sx={{ width: 250 }}>
@@ -440,9 +481,15 @@ export default function Mysql() {
             </Card>
           </Container>
 
-          <Button fullWidth onClick={handleSubmit}>
-            <Typography variant="h6">提交</Typography>
-          </Button>
+          {columns[1].length === countones ? (
+            <Button fullWidth onClick={handleSubmit}>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          ) : (
+            <Button fullWidth disabled>
+              <Typography variant="h6">提交</Typography>
+            </Button>
+          )}
         </>
       ) : null}
       <Snackbar open={snackbarStatus}>{alert}</Snackbar>

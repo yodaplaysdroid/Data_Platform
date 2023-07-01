@@ -25,6 +25,7 @@ export default function Fix() {
       body: JSON.stringify({
         tablename: tb,
         startpoint: 1,
+        records: 250,
       }),
     };
     console.log(requestOptions);

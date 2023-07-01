@@ -170,7 +170,9 @@ class Mysql_Input:
     # status: -10 -> 连接不上达梦数据库
     # status: -1 -> 此表不存在
     # status: >1 -> 数据导入问题（可能出现违规 sql 约束问题）
-    def extract(self, database: str, read_table: str, write_table: str) -> dict:
+    def extract(
+        self, database: str, read_table: str, write_table: str, select_columns: list
+    ) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
             res["status"] = -1
@@ -202,7 +204,9 @@ class Mysql_Input:
             # 从 Mysql 提取数据
             try:
                 count = 0
-                cursor.execute(f"select * from {read_table}")
+                select = ", ".join(select_columns)
+                cursor.execute(f"select {select} from {read_table}")
+                print(f"select {select} from {read_table}")
                 results = cursor.fetchall()
 
                 # 把数据一条一条刷入达梦数据库

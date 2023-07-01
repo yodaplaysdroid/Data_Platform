@@ -180,6 +180,7 @@ class Minio_Input:
         directory: str,
         write_table: str,
         filetype: str,
+        delete_columns: list,
         sheet_name="",
     ) -> dict:
         res = {}
@@ -210,10 +211,14 @@ class Minio_Input:
         # 加载文件为 pandas dataframe 对象
         if filetype == "csv":
             try:
-                df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'")
+                df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'").drop(
+                    columns=delete_columns
+                )
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/minio", encoding="utf-8", quotechar="'")
+                    df = pd.read_csv(
+                        "/tmp/minio", encoding="utf-8", quotechar="'"
+                    ).drop(columns=delete_columns)
                 except Exception as f:
                     print(f)
                     print("File Reading Error", e)
@@ -221,12 +226,14 @@ class Minio_Input:
                     return res
         elif filetype == "txt":
             try:
-                df = pd.read_csv("/tmp/minio", sep="\t", encoding="gbk", quotechar="'")
+                df = pd.read_csv(
+                    "/tmp/minio", sep="\t", encoding="gbk", quotechar="'"
+                ).drop(columns=delete_columns)
             except Exception as e:
                 try:
                     df = pd.read_csv(
                         "/tmp/minio", sep="\t", encoding="utf-8", quotechar="'"
-                    )
+                    ).drop(columns=delete_columns)
                 except Exception as f:
                     print(f)
                     print("File Reading Error", e)
@@ -234,7 +241,9 @@ class Minio_Input:
                     return res
         else:
             try:
-                df = pd.read_excel("/tmp/minio", sheet_name=sheet_name)
+                df = pd.read_excel("/tmp/minio", sheet_name=sheet_name).drop(
+                    columns=delete_columns
+                )
             except Exception as e:
                 print("File Reading Error", e)
                 res["status"] = -2

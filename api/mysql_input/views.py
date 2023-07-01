@@ -147,9 +147,10 @@ def data_transfer(request):
         database = data.get("database")
         read_table = data.get("readtable")
         write_table = data.get("writetable")
+        select_columns = data.get("selectcolumns")
 
         mysql = Mysql_Input(username, password, host)
-        res = mysql.extract(database, read_table, write_table)
+        res = mysql.extract(database, read_table, write_table, select_columns)
         print(res)
         return JsonResponse(res)
     else:

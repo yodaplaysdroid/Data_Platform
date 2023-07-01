@@ -39,12 +39,12 @@ class Dameng:
     # status: 0 -> 采取成功
     # status: -1 -> 连接失败
     # status: -2 -> 表不存在
-    def get_tmp(self, table: str, start_point: int) -> dict:
+    def get_tmp(self, table: str, start_point: int, records: int) -> dict:
         res = {}
         if self.connect() == 0:
             try:
                 self.cursor.execute(
-                    f"select * from {table}tmp where id >= {start_point} limit 50"
+                    f"select * from {table}tmp where id >= {start_point} limit {records}"
                 )
                 results = self.cursor.fetchall()
                 res["errors"] = []
@@ -83,6 +83,23 @@ class Dameng:
                         res["errors"] = [
                             [id, str(e)],
                         ]
+                    count += 1
+            res["status"] = count
+        else:
+            res["status"] = -1
+        return res
+
+    def delete_errors(self, table_name: str, items_to_delete: list):
+        res = {}
+        if self.connect() == 0:
+            count = 0
+            for id in items_to_delete:
+                try:
+                    self.cursor.execute(
+                        f"delete from {table_name}tmp where id == {int(id)}"
+                    )
+                except Exception as e:
+                    print(e)
                     count += 1
             res["status"] = count
         else:
