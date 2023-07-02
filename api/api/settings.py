@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "hdfs_input",
     "minio_input",
     "error_handler",
+    "dameng",
 ]
 
 MIDDLEWARE = [

@@ -9,16 +9,26 @@ import {
   Box,
   Button,
   IconButton,
-  MenuItem,
-  Select,
+  Popover,
   Toolbar,
   Typography,
 } from "@mui/material";
 import Home from "./components/Home";
 import Fix from "./components/Fix";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import { useState } from "react";
 
 export default function App() {
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const open = Boolean(anchorEl);
   return (
     <div className="main">
       <Box sx={{ flexGrow: 1 }}>
@@ -42,35 +52,43 @@ export default function App() {
               物流数据平台
             </Typography>
             <div>
-              <Select
-                value=""
-                displayEmpty
-                inputProps={{ "aria-label": "Without label" }}
-                size="small"
-                sx={{ color: "aliceblue" }}
+              <Button color="inherit" onClick={handleClick}>
+                处理错误记录
+              </Button>
+              <Popover
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                sx={{ display: "block", justifyContent: "center" }}
               >
-                <MenuItem value="">
-                  <em>选择表格</em>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/物流公司">物流公司</Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/客户信息">客户信息</Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/物流信息">物流信息</Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/集装箱动态">集装箱动态</Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/装货表">装货表</Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button href="/fix/卸货表">卸货表</Button>
-                </MenuItem>
-              </Select>
+                <Button href="/fix/物流公司" sx={{ width: 100, height: 50 }}>
+                  物流公司
+                </Button>
+                <br />
+                <Button href="/fix/客户信息" sx={{ width: 100, height: 50 }}>
+                  客户信息
+                </Button>
+                <br />
+                <Button href="/fix/物流信息" sx={{ width: 100, height: 50 }}>
+                  物流信息
+                </Button>
+                <br />
+                <Button href="/fix/集装箱动态" sx={{ width: 100, height: 50 }}>
+                  集装箱动态
+                </Button>
+                <br />
+                <Button href="/fix/装货表" sx={{ width: 100, height: 50 }}>
+                  装货表
+                </Button>
+                <br />
+                <Button href="/fix/卸货表" sx={{ width: 100, height: 50 }}>
+                  卸货表
+                </Button>
+              </Popover>
               <Button color="inherit" href="/input/">
                 数据导入
               </Button>

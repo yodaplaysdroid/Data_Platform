@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import FixT1 from "./FixT1";
 import FixT2 from "./FixT2";
 import FixT3 from "./FixT3";
@@ -8,7 +8,6 @@ import FixT5 from "./FixT5";
 import FixT6 from "./FixT6";
 
 export default function Fix() {
-  const navigate = useNavigate();
   const { table } = useParams();
   const [rend, setRend] = useState(<></>);
   const [status, setStatus] = useState(0);
@@ -38,7 +37,6 @@ export default function Fix() {
       })
       .then(() => {
         if (localStorage.getItem("t") !== null) {
-          console.log(JSON.parse(localStorage.getItem("t")));
           if (table === "物流公司") {
             setRend(<FixT1 />);
           } else if (table === "客户信息") {

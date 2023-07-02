@@ -93,7 +93,7 @@ class Mysql_Input:
         return res
 
     # 验证身份证格式
-    def __is_valid_id(id: str) -> bool:
+    def __is_valid_id(self, id: str) -> bool:
         # 省份代码集
         province = (
             list(range(11, 16))
@@ -110,7 +110,7 @@ class Mysql_Input:
         city = list(range(1, 100))
 
         # 验证校验码是否正确
-        def verify(self, id: str):
+        def verify(id: str):
             sum = 0
             wi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
             for i in range(17):

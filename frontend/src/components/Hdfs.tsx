@@ -365,7 +365,6 @@ export default function Hdfs() {
             sx={{
               display: "flex",
               justifyContent: "space-around",
-              alignItems: "center",
               marginTop: 5,
               marginBottom: 5,
             }}

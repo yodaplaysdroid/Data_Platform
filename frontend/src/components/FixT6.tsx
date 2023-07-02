@@ -21,11 +21,15 @@ import {
   FormControlLabel,
   Switch,
   CircularProgress,
+  Modal,
 } from "@mui/material";
 import { useMemo, useState } from "react";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import Edit from "./Edit";
 
 export default function FixT6() {
-  const data = JSON.parse(localStorage.getItem("t"));
+  const t = localStorage.getItem("t");
+  const data = t ? JSON.parse(t) : "";
   console.log(data);
 
   interface Data {
@@ -308,7 +312,7 @@ export default function FixT6() {
 
   interface EnhancedTableToolbarProps {
     numSelected: number;
-    selectedItems: string[];
+    selectedItems: readonly number[];
   }
 
   const [isLoading, setIsLoading] = useState(<></>);
@@ -376,6 +380,13 @@ export default function FixT6() {
         {numSelected > 0 ? (
           <>
             {isLoading}
+            {numSelected === 1 ? (
+              <Tooltip title="Edit" onClick={handleOpenModal}>
+                <IconButton>
+                  <EditRoundedIcon />
+                </IconButton>
+              </Tooltip>
+            ) : null}
             <Tooltip title="Delete" onClick={handleDelete}>
               <IconButton>
                 <DeleteIcon />
@@ -395,13 +406,13 @@ export default function FixT6() {
 
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Data>("id");
-  const [selected, setSelected] = useState<readonly string[]>([]);
+  const [selected, setSelected] = useState<readonly number[]>([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
+    _event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
     const isAsc = orderBy === property && order === "asc";
@@ -418,7 +429,7 @@ export default function FixT6() {
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
+  const handleClick = (_event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected: readonly number[] = [];
 
@@ -438,7 +449,7 @@ export default function FixT6() {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -467,103 +478,136 @@ export default function FixT6() {
       ),
     [order, orderBy, page, rowsPerPage]
   );
+  const [openModal, setOpenModal] = useState(false);
+  function handleOpenModal(_e: React.MouseEvent) {
+    setOpenModal(true);
+  }
+  const handleCloseModal = () => setOpenModal(false);
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar
-          numSelected={selected.length}
-          selectedItems={selected}
-        />
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+    <>
+      <Box sx={{ width: "100%" }}>
+        <Paper sx={{ width: "100%", mb: 2 }}>
+          <EnhancedTableToolbar
+            numSelected={selected.length}
+            selectedItems={selected}
+          />
+          <TableContainer>
+            <Table
+              sx={{ minWidth: 750 }}
+              aria-labelledby="tableTitle"
+              size={dense ? "small" : "medium"}
+            >
+              <EnhancedTableHead
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={rows.length}
+              />
+              <TableBody>
+                {visibleRows.map((row, index) => {
+                  const isItemSelected = isSelected(row.id);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          "aria-labelledby": labelId,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.id)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.id}
+                      selected={isItemSelected}
+                      sx={{ cursor: "pointer" }}
                     >
-                      {row.id}
-                    </TableCell>
-                    <TableCell align="right">{row.错误类型}</TableCell>
-                    <TableCell align="right">{row.船公司}</TableCell>
-                    <TableCell align="right">{row.船名称}</TableCell>
-                    <TableCell align="right">{row.作业开始时间}</TableCell>
-                    <TableCell align="right">{row.作业结束时间}</TableCell>
-                    <TableCell align="right">{row.始发时间}</TableCell>
-                    <TableCell align="right">{row.到达时间}</TableCell>
-                    <TableCell align="right">{row.作业港口}</TableCell>
-                    <TableCell align="right">{row.提单号}</TableCell>
-                    <TableCell align="right">{row.集装箱箱号}</TableCell>
-                    <TableCell align="right">{row.箱尺寸_TEU}</TableCell>
-                    <TableCell align="right">{row.启运地}</TableCell>
-                    <TableCell align="right">{row.目的地}</TableCell>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          inputProps={{
+                            "aria-labelledby": labelId,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        padding="none"
+                      >
+                        {row.id}
+                      </TableCell>
+                      <TableCell align="right">{row.错误类型}</TableCell>
+                      <TableCell align="right">{row.船公司}</TableCell>
+                      <TableCell align="right">{row.船名称}</TableCell>
+                      <TableCell align="right">{row.作业开始时间}</TableCell>
+                      <TableCell align="right">{row.作业结束时间}</TableCell>
+                      <TableCell align="right">{row.始发时间}</TableCell>
+                      <TableCell align="right">{row.到达时间}</TableCell>
+                      <TableCell align="right">{row.作业港口}</TableCell>
+                      <TableCell align="right">{row.提单号}</TableCell>
+                      <TableCell align="right">{row.集装箱箱号}</TableCell>
+                      <TableCell align="right">{row.箱尺寸_TEU}</TableCell>
+                      <TableCell align="right">{row.启运地}</TableCell>
+                      <TableCell align="right">{row.目的地}</TableCell>
+                    </TableRow>
+                  );
+                })}
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: (dense ? 33 : 53) * emptyRows,
+                    }}
+                  >
+                    <TableCell colSpan={6} />
                   </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+        <FormControlLabel
+          control={<Switch checked={dense} onChange={handleChangeDense} />}
+          label="Dense padding"
         />
-      </Paper>
-      <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
-        label="Dense padding"
-      />
-    </Box>
+      </Box>
+      <div>
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute" as "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 600,
+              height: 600,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+              overflow: "scroll",
+            }}
+          >
+            <Edit tableName="卸货表" itemId={Number(selected)} />
+          </Box>
+        </Modal>
+      </div>
+    </>
   );
 }

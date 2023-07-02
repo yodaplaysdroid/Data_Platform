@@ -1,52 +1,81 @@
-import * as React from "react";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
-import { Button } from "@mui/material";
 
 export default function Home() {
-  const columns = [
-    ["客户名称", "客户编号", "手机号", "省市区"],
-    ["客户名称", "客户编号", "手机号", "省市区"],
-  ];
-  const [checked, setChecked] = useState(Array(columns[0].length).fill(1));
-  function handleChange(e: any) {
-    console.log(e.target.id);
-    let tmp = checked;
-    tmp[Number(e.target.id)] === 0
-      ? (tmp[Number(e.target.id)] = 1)
-      : (tmp[Number(e.target.id)] = 0);
-    setChecked(tmp);
-    console.log(checked);
+  const [res, setRes] = useState<any[]>([]);
+  const [status, setStatus] = useState(1);
+  if (status === 1) {
+    fetch("http://36.140.31.145:31684/dm/refresh/");
+    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+记录信息")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setStatus(data.status);
+        setRes(data.results);
+      });
   }
-  function handleSubmit() {
-    let tmp: string[] = [];
-    for (let c in checked) {
-      if (checked[c] === 0) {
-        tmp.push(columns[0][c]);
-      }
-    }
-    console.log(tmp);
-  }
-
   return (
     <>
-      <FormGroup>
-        {columns[0].map((item: string, index) => (
-          <FormControlLabel
-            control={
-              <Checkbox
-                defaultChecked
-                id={index.toString()}
-                onChange={handleChange}
-              />
-            }
-            label={item}
-          />
-        ))}
-      </FormGroup>
-      <Button onClick={handleSubmit}>submit</Button>
+      {status === 0 ? (
+        <>
+          <Box sx={{ p: 4, display: "flex" }}>
+            <Box
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
+                表格记录个数
+              </Typography>
+              <TableContainer component={Paper}>
+                <Table
+                  sx={{ width: 200 }}
+                  size="small"
+                  aria-label="a dense table"
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>表格</TableCell>
+                      <TableCell align="right">记录个数</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {res.map((item) => (
+                      <TableRow
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell component="th" scope="row">
+                          {item[0]}
+                        </TableCell>
+                        <TableCell align="right">{item[1]}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </Box>
+        </>
+      ) : null}
     </>
   );
 }

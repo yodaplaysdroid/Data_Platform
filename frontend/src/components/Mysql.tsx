@@ -189,7 +189,7 @@ export default function Mysql() {
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
         setChecked(Array(tmp[0].length).fill(1));
-        setCountones(tmp.length);
+        setCountones(tmp[0].length);
         setPage(4);
       });
   }
@@ -442,7 +442,6 @@ export default function Mysql() {
             sx={{
               display: "flex",
               justifyContent: "space-around",
-              alignItems: "center",
               marginTop: 5,
               marginBottom: 5,
             }}
@@ -466,7 +465,6 @@ export default function Mysql() {
                     />
                   ))}
                 </FormGroup>
-                <Button onClick={handleSubmit}>submit</Button>
               </CardContent>
             </Card>
             <Card id="columns1" sx={{ width: 250 }}>
