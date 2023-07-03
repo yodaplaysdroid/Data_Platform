@@ -217,6 +217,9 @@ group by s1.货物名称;
 create view 分析5 as
 select 货物名称 as x, 数量吞吐量, 总货重 from 分析五 where 堆存港口 = '杭州港';
 
+create view 分析5 as
+select 堆存港口 as x, 数量吞吐量, 总货重 from 分析五 where 货物名称 = '大豆粉';
+
 // 主页分析1
 
 SELECT 货物名称, count(货重_吨)

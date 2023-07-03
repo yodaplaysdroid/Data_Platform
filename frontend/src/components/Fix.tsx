@@ -12,11 +12,6 @@ export default function Fix() {
   const [rend, setRend] = useState(<></>);
   const [status, setStatus] = useState(0);
 
-  if (status === 0) {
-    localStorage.clear();
-    setStatus(1);
-  }
-
   function getData(tb: any) {
     const requestOptions = {
       method: "POST",

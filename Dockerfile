@@ -44,3 +44,4 @@ EXPOSE 8000
 
 # 启动 django 服务
 CMD python3 manage.py runserver 0.0.0.0:8000
+
