@@ -220,32 +220,14 @@ select 货物名称 as x, 数量吞吐量, 总货重 from 分析五 where 堆存
 create view 分析5 as
 select 堆存港口 as x, 数量吞吐量, 总货重 from 分析五 where 货物名称 = '大豆粉';
 
-// 主页分析1
-
-SELECT 货物名称, count(货重_吨)
-FROM 集装箱动态, 物流信息
-WHERE 物流信息.提单号 = 集装箱动态.提单号
-and 操作日期 in (select distinct 操作日期 from 集装箱动态 where substring(操作日期, 1, 7) in (select distinct 年月 from 分析三 order by 年月 desc limit 3))
-group by 货物名称
-order by count(货重_吨) desc
-limit 3;
-
-// 主页分析2
-
-select 货物名称, count(总货重), sum(总货重) from 分析三 where 年月 in (
-select distinct 年月 from 分析三 order by 年月 desc limit 3)
-group by 货物名称
-order by count(总货重), sum(总货重) desc
-limit 3;
-
 // 主页分析3
 
-select substring(省市区, 1, 2), count(提单号)
+select substring(省市区, 1, 2), count(提单号), sum(货重_吨)
 from 客户信息, 物流信息
 where 货主代码=客户编号
 group by substring(省市区, 1, 2)
 order by count(提单号) desc
-limit 3;
+limit 5;
 
 // 主页分析4
 
@@ -254,14 +236,14 @@ from 集装箱动态
 where 操作='入库'
 group by 堆存港口
 order by count(提单号) desc
-limit 3;
+limit 5;
 
 select 堆存港口, count(提单号)
 from 集装箱动态
 where 操作='出库'
 group by 堆存港口
 order by count(提单号) desc
-limit 3;
+limit 5;
 
 // 主页分析5
 
@@ -269,4 +251,4 @@ select substring(装货表.作业开始时间, 1, 7), avg(datediff(day, 装货�
 from 装货表, 卸货表
 where 装货表.提单号 = 卸货表.提单号
 group by substring(装货表.作业开始时间, 1, 7)
-order by substring(装货表.作业开始时间, 1, 7) desc
+order by substring(装货表.作业开始时间, 1, 7)

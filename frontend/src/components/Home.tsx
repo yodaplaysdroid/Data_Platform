@@ -4,7 +4,9 @@ import {
   Card,
   FormControl,
   InputLabel,
+  ListItemText,
   MenuItem,
+  MenuList,
   Paper,
   Popover,
   Select,
@@ -18,6 +20,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { Chart as ChartJS, registerables } from "chart.js";
+import { Line } from "react-chartjs-2";
+
+ChartJS.register(...registerables);
 
 export default function Home() {
   const [res, setRes] = useState<any[]>([]);
@@ -42,6 +48,11 @@ export default function Home() {
 
   const [harbors, setHarbors] = useState<any[]>([]);
   const [goods, setGoods] = useState<any[]>([]);
+
+  const [ann3, setAnn3] = useState<any[]>([]);
+  const [ann4, setAnn4] = useState<any[]>([]);
+  const [ann5, setAnn5] = useState<any[]>([]);
+  const [ann6, setAnn6] = useState<any[]>([]);
   let tmp = localStorage.getItem("an5v");
   let an5v = tmp ? tmp : "";
 
@@ -50,7 +61,6 @@ export default function Home() {
     fetch("http://36.140.31.145:31684/dm/?query=select+*+from+记录信息")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setStatus(data.status);
         setRes(data.results);
       });
@@ -60,7 +70,6 @@ export default function Home() {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setStatus(data.status);
         setYears(data.results);
       });
@@ -70,7 +79,6 @@ export default function Home() {
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           setStatus(data.status);
           setMonths1(data.results);
         });
@@ -81,7 +89,6 @@ export default function Home() {
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           setStatus(data.status);
           setMonths2(data.results);
         });
@@ -91,7 +98,6 @@ export default function Home() {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log("harbors", data);
         setHarbors(data.results);
       });
     fetch(
@@ -99,13 +105,43 @@ export default function Home() {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log("goods", data);
         setGoods(data.results);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select%20substring%28%E7%9C%81%E5%B8%82%E5%8C%BA%2C%201%2C%202%29%2C%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%2C%20sum%28%E8%B4%A7%E9%87%8D_%E5%90%A8%29%0Afrom%20%E5%AE%A2%E6%88%B7%E4%BF%A1%E6%81%AF%2C%20%E7%89%A9%E6%B5%81%E4%BF%A1%E6%81%AF%0Awhere%20%E8%B4%A7%E4%B8%BB%E4%BB%A3%E7%A0%81%3D%E5%AE%A2%E6%88%B7%E7%BC%96%E5%8F%B7%0Agroup%20by%20substring%28%E7%9C%81%E5%B8%82%E5%8C%BA%2C%201%2C%202%29%0Aorder%20by%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%20desc%0Alimit%205%3B"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setAnn3(data.results);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select%20%E5%A0%86%E5%AD%98%E6%B8%AF%E5%8F%A3%2C%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%0Afrom%20%E9%9B%86%E8%A3%85%E7%AE%B1%E5%8A%A8%E6%80%81%0Awhere%20%E6%93%8D%E4%BD%9C%3D%27%E5%85%A5%E5%BA%93%27%0Agroup%20by%20%E5%A0%86%E5%AD%98%E6%B8%AF%E5%8F%A3%0Aorder%20by%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%20desc%0Alimit%205%3B"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setAnn4(data.results);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select%20%E5%A0%86%E5%AD%98%E6%B8%AF%E5%8F%A3%2C%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%0Afrom%20%E9%9B%86%E8%A3%85%E7%AE%B1%E5%8A%A8%E6%80%81%0Awhere%20%E6%93%8D%E4%BD%9C%3D%27%E5%87%BA%E5%BA%93%27%0Agroup%20by%20%E5%A0%86%E5%AD%98%E6%B8%AF%E5%8F%A3%0Aorder%20by%20count%28%E6%8F%90%E5%8D%95%E5%8F%B7%29%20desc%0Alimit%205%3B"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setAnn5(data.results);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select%20substring%28%E8%A3%85%E8%B4%A7%E8%A1%A8.%E4%BD%9C%E4%B8%9A%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%2C%201%2C%207%29%2C%20avg%28datediff%28day%2C%20%E8%A3%85%E8%B4%A7%E8%A1%A8.%E4%BD%9C%E4%B8%9A%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%2C%20%E5%8D%B8%E8%B4%A7%E8%A1%A8.%E4%BD%9C%E4%B8%9A%E7%BB%93%E6%9D%9F%E6%97%B6%E9%97%B4%29%29%20as%20%E6%97%B6%E9%97%B4%0Afrom%20%E8%A3%85%E8%B4%A7%E8%A1%A8%2C%20%E5%8D%B8%E8%B4%A7%E8%A1%A8%0Awhere%20%E8%A3%85%E8%B4%A7%E8%A1%A8.%E6%8F%90%E5%8D%95%E5%8F%B7%20%3D%20%E5%8D%B8%E8%B4%A7%E8%A1%A8.%E6%8F%90%E5%8D%95%E5%8F%B7%0Agroup%20by%20substring%28%E8%A3%85%E8%B4%A7%E8%A1%A8.%E4%BD%9C%E4%B8%9A%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%2C%201%2C%207%29%0Aorder%20by%20substring%28%E8%A3%85%E8%B4%A7%E8%A1%A8.%E4%BD%9C%E4%B8%9A%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%2C%201%2C%207%29"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        let t: any[] = [[], []];
+        for (let i in data.results) {
+          t[0].push(data.results[i][0]);
+          t[1].push(data.results[i][1]);
+        }
+        setAnn6(t);
       });
   }
   function handleChangeYear(e: SelectChangeEvent<unknown>, id: string) {
-    console.log(e.target.value);
-    console.log(id);
     fetch(
       `http://36.140.31.145:31684/dm/?query=select+distinct+substring%28操作日期%2C+6%2C+2%29+from+集装箱动态+where+操作日期+like+%27${e.target.value}%25%27+order+by+substring%28操作日期%2C+6%2C+2%29`
     )
@@ -627,11 +663,142 @@ export default function Home() {
                 fontSize={18}
                 sx={{ marginBottom: 1 }}
               >
+                省份货物消费排行
+              </Typography>
+              <br />
+              {
+                <MenuList sx={{ width: 480 }}>
+                  {ann3.map((item) => (
+                    <MenuItem>
+                      <ListItemText>{item[0]}</ListItemText>
+                      <Typography variant="body2" color="text.secondary">
+                        {item[1]}
+                        {" 单"} / {item[2]}
+                        {" 吨"}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              }
+            </Card>
+            <Card
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+                margin: 2,
+                height: "fit-content",
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
+                入库堆存港口排行
+              </Typography>
+              <br />
+              {
+                <MenuList sx={{ width: 350 }}>
+                  {ann4.map((item) => (
+                    <MenuItem>
+                      <ListItemText>{item[0]}</ListItemText>
+                      <Typography variant="body2" color="text.secondary">
+                        {item[1]}
+                        {" 次"}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              }
+            </Card>
+            <Card
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+                margin: 2,
+                height: "fit-content",
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
+                出库堆存港口排行
+              </Typography>
+              <br />
+              {
+                <MenuList sx={{ width: 350 }}>
+                  {ann5.map((item) => (
+                    <MenuItem>
+                      <ListItemText>{item[0]}</ListItemText>
+                      <Typography variant="body2" color="text.secondary">
+                        {item[1]}
+                        {" 次"}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              }
+            </Card>
+            <Card
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+                margin: 2,
+                width: 600,
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
+                货物传送时间周期趋势
+              </Typography>
+              <br />
+              <Line
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: ann6[0],
+                  datasets: [
+                    {
+                      label: "时间周期（日）",
+                      data: ann6[1],
+                      fill: false,
+                      borderColor: "#711490",
+                      tension: 0.1,
+                    },
+                  ],
+                }}
+              />
+            </Card>
+            <Card
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+                margin: 2,
+                height: "fit-content",
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
                 运输时间周期分析
               </Typography>
               <br />
               <iframe
-                style={{ height: 200, width: 1380 }}
+                style={{ height: 300, width: 680 }}
                 src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670137009093484545&isTemplate=0"
                 frameBorder={0}
               ></iframe>
