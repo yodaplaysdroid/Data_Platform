@@ -1,7 +1,9 @@
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
-from .models import Dameng
 from django.views.decorators.csrf import csrf_exempt
 import json
+from . import models
 
 columns = {
     "物流公司": [
@@ -45,23 +47,42 @@ columns = {
 }
 
 
+@csrf_exempt
+def send_file(request):
+    if request.method == "POST" and request.FILES.get("file"):
+        uploaded_file = request.FILES["file"]
+
+        # Save the file to a specific directory
+        fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+        filename = fs.save("local", uploaded_file)
+        uploaded_file_url = fs.url(filename)
+
+        return JsonResponse(
+            {
+                "status": 0,
+                "message": "File uploaded successfully.",
+                "file_url": uploaded_file_url,
+            }
+        )
+    else:
+        return JsonResponse({"error": "Invalid request."}, status=400)
+
+
 # status: 0 -> 迁移成功
 # status: 99 -> request method 不对
-# response = {status: int, errors: list<json>}
+# response = {status: int}
 @csrf_exempt
-def get_tmp(request):
+def get_columns(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        table_name = data.get("tablename")
-        start_point = data.get("startpoint")
-        records = data.get("records")
+        filetype = data.get("filetype")
+        write_table = data.get("writetable")
+        sheet_name = data.get("sheetname")
 
-        dm = Dameng()
-        res = dm.get_tmp(table_name, start_point, records)
-        res["columns"] = columns[table_name]
-
+        res = models.get_columns(filetype, sheet_name)
+        res["columns2"] = columns[write_table]
+        print(res)
         return JsonResponse(res)
-
     else:
         return JsonResponse(
             {"status": 99, "message": "suppose to use POST requests instead of GET"}
@@ -70,40 +91,19 @@ def get_tmp(request):
 
 # status: 0 -> 迁移成功
 # status: 99 -> request method 不对
-# response = {status: int, errors: list<json>}
+# response = {status: int}
 @csrf_exempt
-def delete_errors(request):
+def data_transfer(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        table_name = data.get("tablename")
-        items_to_delete = data.get("itemstodelete")
+        filetype = data.get("filetype")
+        write_table = data.get("writetable")
+        sheet_name = data.get("sheetname")
+        delete_columns = data.get("deletecolumns")
 
-        dm = Dameng()
-        res = dm.delete_errors(table_name, items_to_delete)
-
+        res = models.extract(write_table, filetype, delete_columns, sheet_name)
+        print(res)
         return JsonResponse(res)
-
-    else:
-        return JsonResponse(
-            {"status": 99, "message": "suppose to use POST requests instead of GET"}
-        )
-
-
-# status: 0 -> 迁移成功
-# status: 99 -> request method 不对
-# response = {status: int, errors: list<json>}
-@csrf_exempt
-def fix_error(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        table_name = data.get("tablename")
-        item_to_fix = data.get("itemtofix")
-
-        dm = Dameng()
-        res = dm.fix_error(table_name, item_to_fix)
-
-        return JsonResponse(res)
-
     else:
         return JsonResponse(
             {"status": 99, "message": "suppose to use POST requests instead of GET"}

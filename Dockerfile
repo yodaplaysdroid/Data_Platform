@@ -21,10 +21,6 @@ RUN apt install vim -y
 COPY ./resources/rclone-v1.62.2-linux-amd64.deb /
 RUN dpkg -i /rclone-v1.62.2-linux-amd64.deb
 RUN mkdir -p /root/.config/rclone
-RUN echo [hdp] >> /root/.config/rclone/rclone.conf
-RUN echo type = hdfs >> /root/.config/rclone/rclone.conf
-RUN echo namenode = hadoopa-namenode.damenga-zone.svc:9000 >> /root/.config/rclone/rclone.conf
-RUN echo username = root >> /root/.config/rclone/rclone.conf
 
 # 清理不必要的文件（减少镜像大小）
 RUN apt autoremove -y

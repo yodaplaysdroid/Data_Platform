@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-(wp1@os_z*!^4@!ifah@l8gl!l=4lh@)*sc3gilanlx_vl8l_&"
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     "minio_input",
     "error_handler",
     "dameng",
+    "database",
+    "local_input",
 ]
 
 MIDDLEWARE = [
@@ -89,3 +91,5 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+MEDIA_ROOT = "/tmp"

@@ -8,4 +8,6 @@ urlpatterns = [
     path("minio_input/", include("minio_input.urls")),
     path("error_handler/", include("error_handler.urls")),
     path("dm/", include("dameng.urls")),
+    path("api/", include("database.urls")),
+    path("local_input/", include("local_input.urls")),
 ]

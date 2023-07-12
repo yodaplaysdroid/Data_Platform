@@ -12,7 +12,7 @@ columns = {
         "省市区",
     ],
     "客户信息": ["客户名称", "客户编号", "手机号", "省市区"],
-    "物流信息": ["提单号", "货主名称", "货主代码", "物流公司", "集装箱箱号", "货物名称", "货重_吨"],
+    "物流信息": ["提单号", "货主名称", "货主代码", "物流公司_货代", "集装箱箱号", "货物名称", "货重_吨"],
     "集装箱动态": ["堆存港口", "集装箱箱号", "箱尺寸_TEU", "提单号", "堆场位置", "操作", "操作日期"],
     "装货表": [
         "船公司",
@@ -53,8 +53,10 @@ def test_connection(request):
     if request.method == "POST":
         data = json.loads(request.body)
         directory = data.get("directory")
+        namenode = data.get("namenode")
+        username = data.get("username")
 
-        hadoop = HDFS(directory)
+        hadoop = HDFS(directory, namenode, username)
         res = hadoop.test_connection()
         print(res)
         return JsonResponse(res)
@@ -72,12 +74,14 @@ def get_columns(request):
     if request.method == "POST":
         data = json.loads(request.body)
         directory = data.get("directory")
+        namenode = data.get("namenode")
+        username = data.get("username")
         filename = data.get("filename")
         filetype = data.get("filetype")
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
 
-        hadoop = HDFS(directory)
+        hadoop = HDFS(directory, namenode, username)
         res = hadoop.get_columns(filetype, filename, sheet_name)
         res["columns2"] = columns[write_table]
         print(res)
@@ -96,13 +100,15 @@ def data_transfer(request):
     if request.method == "POST":
         data = json.loads(request.body)
         directory = data.get("directory")
+        namenode = data.get("namenode")
+        username = data.get("username")
         filename = data.get("filename")
         filetype = data.get("filetype")
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
         delete_columns = data.get("deletecolumns")
 
-        hadoop = HDFS(directory)
+        hadoop = HDFS(directory, namenode, username)
         res = hadoop.extract(
             filetype, filename, write_table, delete_columns, sheet_name
         )

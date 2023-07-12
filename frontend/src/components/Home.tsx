@@ -29,18 +29,10 @@ export default function Home() {
   const [res, setRes] = useState<any[]>([]);
   const [status, setStatus] = useState(1);
 
-  let tmp1 = localStorage.getItem("year1");
-  let data1 = tmp1 ? tmp1 : "";
-  const [year1, setYear1] = useState<any>(data1);
-  let tmp2 = localStorage.getItem("year2");
-  let data2 = tmp2 ? tmp2 : "";
-  const [year2, setYear2] = useState<any>(data2);
-  let tmp3 = localStorage.getItem("month1");
-  let data3 = tmp3 ? tmp3 : "";
-  const [month1, setMonth1] = useState<any>(data3);
-  let tmp4 = localStorage.getItem("month2");
-  let data4 = tmp4 ? tmp4 : "";
-  const [month2, setMonth2] = useState<any>(data4);
+  const [year1, setYear1] = useState<any>("");
+  const [year2, setYear2] = useState<any>("");
+  const [month1, setMonth1] = useState<any>("");
+  const [month2, setMonth2] = useState<any>("");
 
   const [years, setYears] = useState<any[]>([]);
   const [months1, setMonths1] = useState<any[]>([]);
@@ -177,7 +169,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: `create view 分析3 as
-        select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重)) as y3 from
+        select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重))*100/sum(s1.总货重) as y3 from
         (select * from 分析三 where 年月 like '${year1}-${month1}%') as s1,
         (select * from 分析三 where 年月 like '${year2}-${month2}%') as s2
         where s1.货物名称 = s2.货物名称
@@ -238,7 +230,14 @@ export default function Home() {
     <>
       {status === 0 ? (
         <>
-          <Box sx={{ p: 2, display: "flex", flexWrap: "wrap" }}>
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Card
               sx={{
                 bgcolor: "background.paper",
@@ -389,6 +388,30 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
+              }}
+            >
+              <Typography
+                variant="button"
+                fontSize={18}
+                sx={{ marginBottom: 1 }}
+              >
+                各港口地理分布
+              </Typography>
+              <br />
+              <iframe
+                style={{ height: 500, width: 1380 }}
+                src="/map/"
+                scrolling="no"
+                frameBorder={0}
+              ></iframe>
+            </Card>
+            <Card
+              sx={{
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                borderRadius: 5,
+                p: 4,
+                margin: 2,
                 height: "fit-content",
               }}
             >
@@ -401,7 +424,7 @@ export default function Home() {
               </Typography>
               <br />
               <iframe
-                style={{ height: 300, width: 1000 }}
+                style={{ height: 400, width: 1000 }}
                 src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670457086149926913&isTemplate=0"
                 frameBorder={0}
               ></iframe>
@@ -419,7 +442,7 @@ export default function Home() {
                 时间段 1
               </Typography>
               <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 280 }} size="small">
+                <Table sx={{ minWidth: 280 }}>
                   <TableBody>
                     <TableRow
                       sx={{
@@ -481,7 +504,7 @@ export default function Home() {
                 时间段 2
               </Typography>
               <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 280 }} size="small">
+                <Table sx={{ minWidth: 280 }}>
                   <TableBody>
                     <TableRow
                       sx={{

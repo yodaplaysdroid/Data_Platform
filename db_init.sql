@@ -195,18 +195,25 @@ order by 集装箱动态.堆存港口, 物流信息.货物名称;
 // 不同类型货物堆场流转周期分析
 
 create view 分析六 as
-select 物流信息.货物名称, avg(datediff(day, 装货表.作业开始时间, 卸货表.作业结束时间)) as 时间消耗_日, avg(datediff(hh, 装货表.作业开始时间, 卸货表.作业结束时间)) as 时间消耗_小时
+select * from (
+select 物流信息.货物名称 as 货物名称, avg(datediff(day, 装货表.作业开始时间, 卸货表.作业结束时间)) as 时间消耗_日
 from 装货表, 卸货表, 物流信息
 where 装货表.提单号 = 卸货表.提单号
 and 装货表.集装箱箱号 = 卸货表.集装箱箱号
 and 装货表.提单号 = 物流信息.提单号
 group by 物流信息.货物名称
-order by 时间消耗_日;
+order by 时间消耗_日) as a,(
+select 货物名称 ,avg(num) from (select 物流信息.提单号, 物流信息.货物名称, count(*)/2 as num
+from 集装箱动态, 物流信息
+where 集装箱动态.提单号=物流信息.提单号
+group by 物流信息.提单号, 物流信息.货物名称)
+group by 货物名称) as b
+where a.货物名称 = b.货物名称
 
 // 分析三的辅助动态视图
 
 create view 分析3 as
-select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重)) as y3 from
+select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重))*100/sum(s1.总货重) as y3 from
 (select * from 分析三 where 年月 like '%-12%') as s1,
 (select * from 分析三 where 年月 like '%-11%') as s2
 where s1.货物名称 = s2.货物名称

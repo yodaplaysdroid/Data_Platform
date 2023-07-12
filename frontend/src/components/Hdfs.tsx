@@ -29,6 +29,10 @@ const writeTables = [
 
 export default function Hdfs() {
   const [directory, setDirectory] = useState("hdp:/");
+  const [namenode, setNamenode] = useState(
+    "hadoopa-namenode.damenga-zone.svc:9000"
+  );
+  const [username, setUsername] = useState("root");
   const [filename, setFilename] = useState("");
   const [filetype, setFiletype] = useState("");
   const [writeTable, setWriteTable] = useState("");
@@ -78,6 +82,8 @@ export default function Hdfs() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         directory: directory,
+        namenode: namenode,
+        username: username,
       }),
     };
     console.log(requestOptions);
@@ -112,6 +118,8 @@ export default function Hdfs() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         directory: directory,
+        namenode: namenode,
+        username: username,
         filename: filename,
         filetype: filetype,
         writetable: writeTable,
@@ -160,6 +168,8 @@ export default function Hdfs() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         directory: directory,
+        namenode: namenode,
+        username: username,
         filename: filename,
         filetype: filetype,
         writetable: writeTable,
@@ -208,13 +218,27 @@ export default function Hdfs() {
       {page === 1 ? (
         <>
           <TextField
-            id="endpoint"
-            label="Endpoint"
+            id="namenode"
+            label="Namenode"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
-            defaultValue="hadoopa-namenode.damenga-zone.svc:9000"
-            onChange={() => {
+            defaultValue={namenode}
+            onChange={(e) => {
+              setNamenode(e.target.value);
+              setIsConnected(1);
+            }}
+          />
+          <br />
+          <TextField
+            id="username"
+            label="Username"
+            variant="standard"
+            fullWidth
+            sx={{ margin: "5px 0" }}
+            defaultValue={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
               setIsConnected(1);
             }}
           />
@@ -287,12 +311,15 @@ export default function Hdfs() {
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             endpoint: hadoopa-namenode.damenga-zone.svc:9000
           </Typography>
+          <br />
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             directory: {directory}
           </Typography>
+          <br />
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             filename: {filename}
           </Typography>
+          <br />
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             filetype:{" "}
             <Select
@@ -311,6 +338,7 @@ export default function Hdfs() {
               <MenuItem value="txt">TSV</MenuItem>
             </Select>
           </Typography>
+          <br />
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             write table:{" "}
             <Select
@@ -329,6 +357,7 @@ export default function Hdfs() {
               ))}
             </Select>
           </Typography>
+          <br />
 
           {filetype === "xls" ? (
             <TextField

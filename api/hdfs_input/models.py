@@ -7,8 +7,19 @@ import subprocess
 
 # HDFS 类
 class HDFS:
-    def __init__(self, directory: str) -> None:
+    def __init__(self, directory: str, namenode: str, username: str) -> None:
         self.directory = directory
+        self.namenode = namenode
+        self.username = username
+        os.system("rm /root/.config/rclone/rclone.conf")
+        os.system(f"echo [{directory[:-2]}] >> /root/.config/rclone/rclone.conf")
+        os.system("echo type = hdfs >> /root/.config/rclone/rclone.conf")
+        os.system(
+            f"echo namenode = {self.namenode} >> /root/.config/rclone/rclone.conf"
+        )
+        os.system(
+            f"echo username = {self.username} >> /root/.config/rclone/rclone.conf"
+        )
 
     # 测试链接
     # status: 0 -> 成功连接

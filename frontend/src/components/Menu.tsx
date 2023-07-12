@@ -12,6 +12,7 @@ import { useState } from "react";
 import Minio from "./Minio";
 import Mysql from "./Mysql";
 import Hdfs from "./Hdfs";
+import Local from "./Local";
 
 export default function Menu() {
   const [open, setOpen] = useState(false);
@@ -29,10 +30,10 @@ export default function Menu() {
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          height: "85vh",
+          height: "75vh",
         }}
       >
-        <Card id="mysql" sx={{ width: 300 }} onClick={handleOpen}>
+        <Card id="mysql" sx={{ width: 250 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/mysql.png" />
             <CardContent>
@@ -40,13 +41,13 @@ export default function Menu() {
                 MySQL 数据导入
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                A relational database management system (RDBMS) developed by
-                Oracle that is based on SQL.
+                A relational database management system developed by Oracle that
+                is based on SQL.
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
-        <Card id="minio" sx={{ width: 300 }} onClick={handleOpen}>
+        <Card id="minio" sx={{ width: 250 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/minio.png" />
             <CardContent>
@@ -60,7 +61,7 @@ export default function Menu() {
             </CardContent>
           </CardActionArea>
         </Card>
-        <Card id="hdfs" sx={{ width: 300 }} onClick={handleOpen}>
+        <Card id="hdfs" sx={{ width: 250 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/hdfs.png" />
             <CardContent>
@@ -70,6 +71,20 @@ export default function Menu() {
               <Typography variant="body2" color="text.secondary">
                 A distributed file system that handles large data sets running
                 on commodity hardware.
+              </Typography>
+            </CardContent>
+          </CardActionArea>
+        </Card>
+        <Card id="local" sx={{ width: 250 }} onClick={handleOpen}>
+          <CardActionArea>
+            <CardMedia component="img" image="/local.jpg" />
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div">
+                本地文件上传
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Select CSV, XLS or TSV files from your local PC to be uploaded
+                to our system.
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -100,6 +115,7 @@ export default function Menu() {
             {fs === "mysql" ? <Mysql /> : null}
             {fs === "minio" ? <Minio /> : null}
             {fs === "hdfs" ? <Hdfs /> : null}
+            {fs === "local" ? <Local /> : null}
           </Box>
         </Modal>
       </div>

@@ -26,6 +26,7 @@ import {
 import { useMemo, useState } from "react";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import Edit from "./Edit";
+import Shortcut from "./Shortcut";
 
 export default function FixT6() {
   const t = localStorage.getItem("t");
@@ -343,64 +344,96 @@ export default function FixT6() {
           window.location.reload();
         });
     }
+    const [open, setOpen] = useState(false);
+    function handleOpen() {
+      setOpen(true);
+    }
+    function handleClose() {
+      setOpen(false);
+    }
 
     return (
-      <Toolbar
-        sx={{
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          ...(numSelected > 0 && {
-            bgcolor: (theme) =>
-              alpha(
-                theme.palette.primary.main,
-                theme.palette.action.activatedOpacity
-              ),
-          }),
-        }}
-      >
-        {numSelected > 0 ? (
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            color="inherit"
-            variant="subtitle1"
-            component="div"
-          >
-            {numSelected} selected
-          </Typography>
-        ) : (
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            variant="h6"
-            id="tableTitle"
-            component="div"
-          >
-            卸货表
-          </Typography>
-        )}
-        {numSelected > 0 ? (
-          <>
-            {isLoading}
-            {numSelected === 1 ? (
-              <Tooltip title="Edit" onClick={handleOpenModal}>
+      <>
+        <Toolbar
+          sx={{
+            pl: { sm: 2 },
+            pr: { xs: 1, sm: 1 },
+            ...(numSelected > 0 && {
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.primary.main,
+                  theme.palette.action.activatedOpacity
+                ),
+            }),
+          }}
+        >
+          {numSelected > 0 ? (
+            <Typography
+              sx={{ flex: "1 1 100%" }}
+              color="inherit"
+              variant="subtitle1"
+              component="div"
+            >
+              {numSelected} selected
+            </Typography>
+          ) : (
+            <Typography
+              sx={{ flex: "1 1 100%" }}
+              variant="h6"
+              id="tableTitle"
+              component="div"
+            >
+              卸货表
+            </Typography>
+          )}
+          {numSelected > 0 ? (
+            <>
+              {isLoading}
+              {numSelected === 1 ? (
+                <Tooltip title="Edit" onClick={handleOpenModal}>
+                  <IconButton>
+                    <EditRoundedIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              <Tooltip title="Delete" onClick={handleDelete}>
                 <IconButton>
-                  <EditRoundedIcon />
+                  <DeleteIcon />
                 </IconButton>
               </Tooltip>
-            ) : null}
-            <Tooltip title="Delete" onClick={handleDelete}>
+            </>
+          ) : (
+            <Tooltip title="一键修改">
               <IconButton>
-                <DeleteIcon />
+                <FilterListIcon onClick={handleOpen} />
               </IconButton>
             </Tooltip>
-          </>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton>
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Toolbar>
+          )}
+        </Toolbar>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute" as "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 600,
+              height: 200,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Shortcut tableName="卸货表" />
+          </Box>
+        </Modal>
+      </>
     );
   }
 

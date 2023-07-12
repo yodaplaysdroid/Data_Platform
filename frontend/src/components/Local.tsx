@@ -1,21 +1,19 @@
 import {
-  Alert,
+  TextField,
   Button,
+  Select,
+  MenuItem,
+  Typography,
+  LinearProgress,
+  Snackbar,
+  IconButton,
+  Alert,
   Card,
   CardContent,
-  Checkbox,
   Container,
-  FormControl,
+  Checkbox,
   FormControlLabel,
   FormGroup,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Snackbar,
-  TextField,
-  Typography,
 } from "@mui/material";
 import { Fragment, useState } from "react";
 
@@ -28,19 +26,18 @@ const writeTables = [
   "卸货表",
 ];
 
-export default function Minio() {
-  const [endpoint, setEndpoint] = useState("minio.damenga-zone.svc");
-  const [secretKey, setSecretKey] = useState("Cnsoft15195979130");
-  const [accessKey, setAccessKey] = useState("cnsof17014913");
-  const [bucket, setBucket] = useState("");
-  const [directory, setDirectory] = useState("");
-  const [filetype, setFiletype] = useState("");
+export default function Mysql() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
   const [writeTable, setWriteTable] = useState("");
+  const [fileType, setFileType] = useState("");
   const [sheetName, setSheetName] = useState("");
 
-  const [isConnected, setIsConnected] = useState(1);
-  const [buckets, setBuckets] = useState([]);
-  const [files, setFiles] = useState([]);
   const [page, setPage] = useState(1);
   const [columns, setColumns] = useState<any[]>([]);
   const [checked, setChecked] = useState<number[]>([]);
@@ -77,110 +74,51 @@ export default function Minio() {
   const [alert, setAlert] = useState(<></>);
   const [submitted, setSubmitted] = useState(false);
 
-  function handleTest() {
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        endpoint: endpoint,
-        accesskey: accessKey,
-        secretkey: secretKey,
-      }),
-    };
-    console.log(requestOptions);
-    fetch(
-      "http://36.140.31.145:31684/minio_input/test_connection/",
-      requestOptions
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setIsConnected(data.status);
-        setSnackbarStatus(true);
-        if (data.status === 0) {
-          setAlert(
-            <Alert severity="success" action={action}>
-              数据库连接成功！
-            </Alert>
-          );
-        } else {
-          setAlert(
-            <Alert severity="error" action={action}>
-              数据库连接失败
-            </Alert>
-          );
-        }
-      });
-  }
-  function handleConnect() {
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        endpoint: endpoint,
-        accesskey: accessKey,
-        secretkey: secretKey,
-      }),
-    };
-    console.log(requestOptions);
-    fetch("http://36.140.31.145:31684/minio_input/get_buckets/", requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data.status === 0) {
-          setBuckets(data.buckets);
-          setPage(2);
-        } else {
+  function handleUpload() {
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      fetch("http://36.140.31.145:31684/local_input/send_file/", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
           setSnackbarStatus(true);
-          setAlert(
-            <Alert severity="error" action={action}>
-              数据库连接失败
-            </Alert>
-          );
-        }
-      });
-  }
-  function handleUseBucket(e: SelectChangeEvent) {
-    setBucket(e.target.value);
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        endpoint: endpoint,
-        accesskey: accessKey,
-        secretkey: secretKey,
-        bucket: e.target.value,
-      }),
-    };
-    console.log(requestOptions);
-    fetch("http://36.140.31.145:31684/minio_input/get_files/", requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data.status === 0) {
-          setFiles(data.objects);
-        } else {
-          setFiles([]);
-        }
-      });
+          if (data.status === 0) {
+            setAlert(
+              <Alert severity="success" action={action}>
+                上传成功！
+              </Alert>
+            );
+          } else {
+            setAlert(
+              <Alert severity="error" action={action}>
+                上传失败
+              </Alert>
+            );
+          }
+          setPage(2);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }
   function handleConfirm() {
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        endpoint: endpoint,
-        accesskey: accessKey,
-        secretkey: secretKey,
-        bucket: bucket,
-        directory: directory,
-        filetype: filetype,
-        writetable: writeTable,
+        filetype: fileType,
         sheetname: sheetName,
+        writetable: writeTable,
       }),
     };
     console.log(requestOptions);
-    fetch("http://36.140.31.145:31684/minio_input/get_columns/", requestOptions)
+    fetch("http://36.140.31.145:31684/local_input/get_columns/", requestOptions)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -188,7 +126,7 @@ export default function Minio() {
         setColumns(tmp);
         setChecked(Array(tmp[0].length).fill(1));
         setCountones(tmp[0].length);
-        setPage(4);
+        setPage(3);
       });
   }
   function handleChange(e: any) {
@@ -221,12 +159,7 @@ export default function Minio() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        endpoint: endpoint,
-        accesskey: accessKey,
-        secretkey: secretKey,
-        bucket: bucket,
-        directory: directory,
-        filetype: filetype,
+        filetype: fileType,
         writetable: writeTable,
         sheetname: sheetName,
         deletecolumns: deleteColumns,
@@ -234,7 +167,7 @@ export default function Minio() {
     };
     console.log(requestOptions);
     fetch(
-      "http://36.140.31.145:31684/minio_input/data_transfer/",
+      "http://36.140.31.145:31684/local_input/data_transfer/",
       requestOptions
     )
       .then((response) => response.json())
@@ -267,137 +200,26 @@ export default function Minio() {
   return (
     <>
       <Typography variant="h6" sx={{ margin: "10px 0" }} align="right">
-        MinIO 数据导入
+        本地上传
       </Typography>
       {loading}
       {page === 1 ? (
         <>
           <TextField
-            id="endpoint"
-            label="Endpoint"
-            variant="standard"
+            type="file"
+            onChange={handleFileChange}
+            label="文件上传"
+            InputLabelProps={{ shrink: true }}
+            sx={{ marginTop: 2 }}
             fullWidth
-            sx={{ margin: "5px 0" }}
-            defaultValue={endpoint}
-            onChange={(e) => {
-              setEndpoint(e.target.value);
-              setIsConnected(1);
-            }}
           />
-          <br />
-          <TextField
-            id="accessKey"
-            label="AccessKey"
-            variant="standard"
-            fullWidth
-            sx={{ margin: "5px 0" }}
-            defaultValue={accessKey}
-            onChange={(e) => {
-              setAccessKey(e.target.value);
-              setIsConnected(1);
-            }}
-          />
-          <br />
-          <TextField
-            id="secretKey"
-            label="SecretKey"
-            variant="standard"
-            fullWidth
-            sx={{ margin: "5px 0" }}
-            defaultValue={secretKey}
-            onChange={(e) => {
-              setSecretKey(e.target.value);
-              setIsConnected(1);
-            }}
-          />
-          <br />
-          <Button fullWidth onClick={handleTest}>
-            <Typography variant="h6">测试连接</Typography>
+          <Button fullWidth sx={{ marginTop: 2 }} onClick={handleUpload}>
+            上传
           </Button>
-          <br />
-          {isConnected === 0 ? (
-            <Button fullWidth onClick={handleConnect}>
-              <Typography variant="h6">连接 MinIO</Typography>
-            </Button>
-          ) : (
-            <Button fullWidth disabled>
-              <Typography variant="h6">连接 MinIO</Typography>
-            </Button>
-          )}
-          <br />
         </>
       ) : null}
-      {page === 2 && buckets.length !== 0 ? (
+      {page === 2 ? (
         <>
-          <FormControl fullWidth>
-            <Select
-              value={bucket}
-              onChange={handleUseBucket}
-              displayEmpty
-              inputProps={{ "aria-label": "Without label" }}
-              sx={{ margin: "5px 0" }}
-            >
-              <MenuItem value="">
-                <em>选择 Bucket</em>
-              </MenuItem>
-              {buckets.map((item) => (
-                <MenuItem value={item}>{item}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <Select
-              value={directory}
-              onChange={(e) => setDirectory(e.target.value)}
-              displayEmpty
-              inputProps={{ "aria-label": "Without label" }}
-              sx={{ margin: "5px 0" }}
-            >
-              <MenuItem value="">
-                <em>选择文件</em>
-              </MenuItem>
-              {files.map((item) => (
-                <MenuItem value={item}>{item}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {directory !== "" && bucket !== "" ? (
-            <Button
-              fullWidth
-              onClick={() => {
-                setPage(3);
-              }}
-            >
-              <Typography variant="h6">提交</Typography>
-            </Button>
-          ) : (
-            <Button disabled fullWidth>
-              <Typography variant="h6">提交</Typography>
-            </Button>
-          )}
-        </>
-      ) : null}
-      {page === 3 ? (
-        <>
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            endpoint: {endpoint}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            access key: {accessKey}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            secret key: {secretKey}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            bucket: {bucket}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            directory: {directory}
-          </Typography>
           <br />
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             write table:{" "}
@@ -421,8 +243,8 @@ export default function Minio() {
           <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
             file type:{" "}
             <Select
-              value={filetype}
-              onChange={(e) => setFiletype(e.target.value)}
+              value={fileType}
+              onChange={(e) => setFileType(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
@@ -437,7 +259,7 @@ export default function Minio() {
             </Select>
           </Typography>
           <br />
-          {filetype === "xls" ? (
+          {fileType === "xls" ? (
             <TextField
               id="sheetName"
               label="Sheet Name"
@@ -466,7 +288,7 @@ export default function Minio() {
           )}
         </>
       ) : null}
-      {page === 4 ? (
+      {page === 3 ? (
         <>
           <Container
             sx={{
@@ -508,6 +330,7 @@ export default function Minio() {
               </CardContent>
             </Card>
           </Container>
+
           {columns[1].length === countones ? (
             <Button fullWidth onClick={handleSubmit}>
               <Typography variant="h6">提交</Typography>
