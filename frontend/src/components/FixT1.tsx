@@ -353,7 +353,7 @@ export default function FixT1() {
               width: 600,
               height: 200,
               bgcolor: "background.paper",
-              border: "2px solid #000",
+              borderRadius: 2,
               boxShadow: 24,
               p: 4,
             }}
@@ -537,12 +537,7 @@ export default function FixT1() {
         />
       </Box>
       <div>
-        <Modal
-          open={openModal}
-          onClose={handleCloseModal}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
+        <Modal open={openModal} onClose={handleCloseModal}>
           <Box
             sx={{
               position: "absolute" as "absolute",
@@ -552,7 +547,7 @@ export default function FixT1() {
               width: 600,
               height: 600,
               bgcolor: "background.paper",
-              border: "2px solid #000",
+              borderRadius: 2,
               boxShadow: 24,
               p: 4,
               overflow: "scroll",

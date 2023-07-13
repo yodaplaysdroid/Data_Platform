@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from . import models
+import os
 
 columns = {
     "物流公司": [
@@ -53,6 +54,7 @@ def send_file(request):
         uploaded_file = request.FILES["file"]
 
         # Save the file to a specific directory
+        os.system("rm /tmp/local")
         fs = FileSystemStorage(location=settings.MEDIA_ROOT)
         filename = fs.save("local", uploaded_file)
         uploaded_file_url = fs.url(filename)

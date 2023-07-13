@@ -221,18 +221,25 @@ export default function Mysql() {
       {page === 2 ? (
         <>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            write table:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"目标数据表: "}</div>
             <Select
               value={writeTable}
               onChange={(e) => setWriteTable(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               {writeTables.map((item) => (
                 <MenuItem value={item}>{item}</MenuItem>
@@ -240,18 +247,25 @@ export default function Mysql() {
             </Select>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            file type:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"文件类型: "}</div>
             <Select
               value={fileType}
               onChange={(e) => setFileType(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               <MenuItem value="csv">CSV</MenuItem>
               <MenuItem value="xls">EXCEL</MenuItem>
@@ -259,23 +273,35 @@ export default function Mysql() {
             </Select>
           </Typography>
           <br />
-          {fileType === "xls" ? (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              defaultValue={sheetName}
-              onChange={(e) => setSheetName(e.target.value)}
-            />
-          ) : (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              disabled
-              defaultValue={sheetName}
-            />
-          )}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"工作表名称: "}</div>
+            {fileType === "xls" ? (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                size="small"
+                sx={{ width: 200 }}
+                onChange={(e) => setSheetName(e.target.value)}
+              />
+            ) : (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                disabled
+                size="small"
+                sx={{ width: 200 }}
+              />
+            )}
+          </Typography>
           <br />
           {writeTable !== "" && !submitted ? (
             <Button fullWidth onClick={handleConfirm}>

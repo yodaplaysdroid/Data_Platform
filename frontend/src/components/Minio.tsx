@@ -29,9 +29,9 @@ const writeTables = [
 ];
 
 export default function Minio() {
-  const [endpoint, setEndpoint] = useState("minio.damenga-zone.svc");
-  const [secretKey, setSecretKey] = useState("Cnsoft15195979130");
-  const [accessKey, setAccessKey] = useState("cnsof17014913");
+  const [endpoint, setEndpoint] = useState("");
+  const [secretKey, setSecretKey] = useState("");
+  const [accessKey, setAccessKey] = useState("");
   const [bucket, setBucket] = useState("");
   const [directory, setDirectory] = useState("");
   const [filetype, setFiletype] = useState("");
@@ -274,7 +274,7 @@ export default function Minio() {
         <>
           <TextField
             id="endpoint"
-            label="Endpoint"
+            label="主机名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -287,7 +287,7 @@ export default function Minio() {
           <br />
           <TextField
             id="accessKey"
-            label="AccessKey"
+            label="用户名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -300,7 +300,8 @@ export default function Minio() {
           <br />
           <TextField
             id="secretKey"
-            label="SecretKey"
+            label="密码"
+            type="password"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -379,38 +380,73 @@ export default function Minio() {
       ) : null}
       {page === 3 ? (
         <>
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            endpoint: {endpoint}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"主机名: "}</div>
+            <div>{endpoint}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            access key: {accessKey}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"用户名: "}</div>
+            <div>{accessKey}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            secret key: {secretKey}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"桶: "}</div>
+            <div>{bucket}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            bucket: {bucket}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"目录: "}</div>
+            <div>{directory}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            directory: {directory}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            write table:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"目标数据表: "}</div>
             <Select
               value={writeTable}
               onChange={(e) => setWriteTable(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               {writeTables.map((item) => (
                 <MenuItem value={item}>{item}</MenuItem>
@@ -418,18 +454,25 @@ export default function Minio() {
             </Select>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            file type:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"文件类型: "}</div>
             <Select
               value={filetype}
               onChange={(e) => setFiletype(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               <MenuItem value="csv">CSV</MenuItem>
               <MenuItem value="xls">EXCEL</MenuItem>
@@ -437,23 +480,37 @@ export default function Minio() {
             </Select>
           </Typography>
           <br />
-          {filetype === "xls" ? (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              defaultValue={sheetName}
-              onChange={(e) => setSheetName(e.target.value)}
-            />
-          ) : (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              disabled
-              defaultValue={sheetName}
-            />
-          )}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"工作表名称: "}</div>
+            {filetype === "xls" ? (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                defaultValue={sheetName}
+                sx={{ width: 200 }}
+                size="small"
+                onChange={(e) => setSheetName(e.target.value)}
+              />
+            ) : (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                sx={{ width: 200 }}
+                disabled
+                size="small"
+                defaultValue={sheetName}
+              />
+            )}
+          </Typography>
           <br />
           {writeTable !== "" && !submitted ? (
             <Button fullWidth onClick={handleConfirm}>

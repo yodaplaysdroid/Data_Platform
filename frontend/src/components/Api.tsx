@@ -5,10 +5,12 @@ import {
   Box,
   Button,
   Card,
+  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
   MenuItem,
+  Modal,
   Paper,
   Popover,
   Select,
@@ -27,6 +29,8 @@ import { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import React from "react";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import saveAs from "file-saver";
 
 export default function Api() {
   const [query, setQuery] = useState("");
@@ -47,6 +51,34 @@ export default function Api() {
     setAnchorEl(null);
   };
   const open = Boolean(anchorEl);
+
+  const [content, setContent] = useState(<></>);
+
+  const [openModal, setOpenModal] = useState(false);
+  function handleOpenModal() {
+    setContent(
+      <>
+        <Typography align="center">
+          正在处理中。。。
+          <br />
+          <br />
+          <CircularProgress />
+        </Typography>
+      </>
+    );
+    setOpenModal(true);
+    fetch("http://36.140.31.145:31684/api/download/?mode=generate")
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .then(() =>
+        setContent(
+          <Button fullWidth onClick={handleDownload}>
+            下载文件
+          </Button>
+        )
+      );
+  }
+  const handleCloseModal = () => setOpenModal(false);
 
   function handleChangeTable(e: SelectChangeEvent<string>) {
     setTable(e.target.value);
@@ -100,10 +132,10 @@ export default function Api() {
     }
     console.log(sql);
     console.log(
-      `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(sql)}`
+      `http://36.140.31.145:31684/api/?query=${encodeURIComponent(sql)}`
     );
 
-    fetch(`http://36.140.31.145:31684/dm/?query=${encodeURIComponent(sql)}`)
+    fetch(`http://36.140.31.145:31684/api/?query=${encodeURIComponent(sql)}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -111,6 +143,18 @@ export default function Api() {
         setStatus(data.status);
       });
   }
+
+  function handleDownload() {
+    fetch("http://36.140.31.145:31684/api/download/?mode=download")
+      .then((response) => response.blob())
+      .then((blob) => {
+        saveAs(blob, "download.xlsx");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   return (
     <>
       <Box
@@ -160,6 +204,11 @@ export default function Api() {
                   *使用 API 地址时，在 query 后面加上 uri 格式的 sql 语句即可*
                 </Typography>
               </Popover>
+              <Tooltip title="Export" onClick={handleOpenModal}>
+                <IconButton>
+                  <DownloadRoundedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Typography>
             <Button
               variant="outlined"
@@ -284,6 +333,24 @@ export default function Api() {
           ) : null}
         </Card>
       </Box>
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute" as "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            height: 80,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          {content}
+        </Box>
+      </Modal>
     </>
   );
 }

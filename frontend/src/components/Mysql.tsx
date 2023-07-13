@@ -29,9 +29,9 @@ const writeTables = [
 ];
 
 export default function Mysql() {
-  const [username, setUsername] = useState("mysqluser");
-  const [password, setPassword] = useState("Dameng123");
-  const [host, setHost] = useState("mysqla-mysqld.damenga-zone.svc");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [host, setHost] = useState("");
   const [database, setDatabase] = useState("");
   const [readTable, setReadTable] = useState("");
   const [writeTable, setWriteTable] = useState("");
@@ -274,7 +274,7 @@ export default function Mysql() {
         <>
           <TextField
             id="username"
-            label="Username"
+            label="用户名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -289,7 +289,8 @@ export default function Mysql() {
           <br />
           <TextField
             id="password"
-            label="Password"
+            label="密码"
+            type="password"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -304,7 +305,7 @@ export default function Mysql() {
           <br />
           <TextField
             id="host"
-            label="Host"
+            label="主机名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -384,29 +385,63 @@ export default function Mysql() {
       ) : null}
       {page === 3 ? (
         <>
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            {"USERNAME: "}
-            {username}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"用户名: "}</div>
+            <div>{username}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            PASSWORD: {password}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"主机名: "}</div>
+            <div>{host}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            HOST: {host}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"数据库: "}</div>
+            <div>{database}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            DATABASE: {database}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"源数据表: "}</div>
+            <div>{readTable}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            READ TABLE: {readTable}
-          </Typography>
-          <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            {"WRITE TABLE: "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"目标数据表: "}</div>
 
             <Select
               value={writeTable}
@@ -414,10 +449,10 @@ export default function Mysql() {
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 150 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               {writeTables.map((item) => (
                 <MenuItem value={item}>{item}</MenuItem>

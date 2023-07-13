@@ -33,7 +33,7 @@ export default function Menu() {
           height: "75vh",
         }}
       >
-        <Card id="mysql" sx={{ width: 250 }} onClick={handleOpen}>
+        <Card id="mysql" sx={{ width: 250, height: 420 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/mysql.png" />
             <CardContent>
@@ -41,13 +41,17 @@ export default function Menu() {
                 MySQL 数据导入
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                A relational database management system developed by Oracle that
-                is based on SQL.
+                支持 MySQL 数据库的连接，并把从 MySQL
+                的源数据通过治理过程后存储在系统的里。
+                <br />
+                <br />
+                <br />
+                <br />
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
-        <Card id="minio" sx={{ width: 250 }} onClick={handleOpen}>
+        <Card id="minio" sx={{ width: 250, height: 420 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/minio.png" />
             <CardContent>
@@ -55,13 +59,15 @@ export default function Menu() {
                 MinIO 数据导入
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                An Apache licensed open source distributed object server that
-                can help you here, and do a lot more.
+                连接 MinIO
+                存储，并提取在存储内的文件信息，动态配置文件选项，经过治理过程后将把数据存储在系统数据库里。
+                <br />
+                <br />
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
-        <Card id="hdfs" sx={{ width: 250 }} onClick={handleOpen}>
+        <Card id="hdfs" sx={{ width: 250, height: 420 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/hdfs.png" />
             <CardContent>
@@ -69,13 +75,13 @@ export default function Menu() {
                 HDFS 数据导入
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                A distributed file system that handles large data sets running
-                on commodity hardware.
+                通过 rClone 服务连接远程 HDFS
+                存储，并提取在存储内的文件信息，动态配置文件选项，经过治理过程后将把数据存储在系统数据库里。
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
-        <Card id="local" sx={{ width: 250 }} onClick={handleOpen}>
+        <Card id="local" sx={{ width: 250, height: 420 }} onClick={handleOpen}>
           <CardActionArea>
             <CardMedia component="img" image="/local.jpg" />
             <CardContent>
@@ -83,8 +89,11 @@ export default function Menu() {
                 本地文件上传
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Select CSV, XLS or TSV files from your local PC to be uploaded
-                to our system.
+                支持本地上传 CSV, EXCEL 以及 TSV 源数据。
+                <br />
+                <br />
+                <br />
+                <br />
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -106,7 +115,7 @@ export default function Menu() {
               width: 600,
               height: 600,
               bgcolor: "background.paper",
-              border: "2px solid #000",
+              borderRadius: 2,
               boxShadow: 24,
               p: 4,
               overflow: "scroll",

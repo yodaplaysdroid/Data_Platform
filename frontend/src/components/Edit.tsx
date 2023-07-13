@@ -110,12 +110,7 @@ export default function Edit(props: EditProps) {
           </TableBody>
         </Table>
       </TableContainer>
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal open={open} onClose={() => setOpen(false)}>
         <Box
           sx={{
             position: "absolute" as "absolute",
@@ -125,7 +120,7 @@ export default function Edit(props: EditProps) {
             width: 400,
             height: 100,
             bgcolor: "background.paper",
-            border: "2px solid #000",
+            borderRadius: 2,
             boxShadow: 24,
             p: 4,
           }}

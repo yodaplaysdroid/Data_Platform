@@ -28,11 +28,9 @@ const writeTables = [
 ];
 
 export default function Hdfs() {
-  const [directory, setDirectory] = useState("hdp:/");
-  const [namenode, setNamenode] = useState(
-    "hadoopa-namenode.damenga-zone.svc:9000"
-  );
-  const [username, setUsername] = useState("root");
+  const [directory, setDirectory] = useState("");
+  const [namenode, setNamenode] = useState("");
+  const [username, setUsername] = useState("");
   const [filename, setFilename] = useState("");
   const [filetype, setFiletype] = useState("");
   const [writeTable, setWriteTable] = useState("");
@@ -219,7 +217,7 @@ export default function Hdfs() {
         <>
           <TextField
             id="namenode"
-            label="Namenode"
+            label="节点名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -232,7 +230,7 @@ export default function Hdfs() {
           <br />
           <TextField
             id="username"
-            label="Username"
+            label="用户名"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -245,7 +243,7 @@ export default function Hdfs() {
           <br />
           <TextField
             id="directory"
-            label="Directory"
+            label="远端，格式例：remote:/"
             variant="standard"
             fullWidth
             sx={{ margin: "5px 0" }}
@@ -308,30 +306,73 @@ export default function Hdfs() {
       ) : null}
       {page === 3 ? (
         <>
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            endpoint: hadoopa-namenode.damenga-zone.svc:9000
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"节点名: "}</div>
+            <div>{namenode}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            directory: {directory}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"用户名: "}</div>
+            <div>{username}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            filename: {filename}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"远端: "}</div>
+            <div>{directory}</div>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            filetype:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"文件名: "}</div>
+            <div>{filename}</div>
+          </Typography>
+          <br />
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"文件类型: "}</div>
             <Select
               value={filetype}
               onChange={(e) => setFiletype(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               <MenuItem value="csv">CSV</MenuItem>
               <MenuItem value="xls">EXCEL</MenuItem>
@@ -339,18 +380,25 @@ export default function Hdfs() {
             </Select>
           </Typography>
           <br />
-          <Typography variant="button" sx={{ fontSize: 18, display: "flex" }}>
-            write table:{" "}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"目标数据表: "}</div>
             <Select
               value={writeTable}
               onChange={(e) => setWriteTable(e.target.value)}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
-              sx={{ marginLeft: "20px" }}
+              sx={{ marginLeft: "20px", width: 200 }}
             >
               <MenuItem value="">
-                <em>None</em>
+                <em>选择</em>
               </MenuItem>
               {writeTables.map((item) => (
                 <MenuItem value={item}>{item}</MenuItem>
@@ -358,24 +406,35 @@ export default function Hdfs() {
             </Select>
           </Typography>
           <br />
-
-          {filetype === "xls" ? (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              defaultValue={sheetName}
-              onChange={(e) => setSheetName(e.target.value)}
-            />
-          ) : (
-            <TextField
-              id="sheetName"
-              label="Sheet Name"
-              variant="standard"
-              disabled
-              defaultValue={sheetName}
-            />
-          )}
+          <Typography
+            variant="button"
+            sx={{
+              fontSize: 18,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>{"工作表名称: "}</div>
+            {filetype === "xls" ? (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                sx={{ width: 200 }}
+                size="small"
+                onChange={(e) => setSheetName(e.target.value)}
+              />
+            ) : (
+              <TextField
+                id="sheetName"
+                label="工作表（EXCEL）"
+                variant="outlined"
+                sx={{ width: 200 }}
+                disabled
+                size="small"
+              />
+            )}
+          </Typography>
           <br />
           {writeTable !== "" && !submitted ? (
             <Button fullWidth onClick={handleConfirm}>
