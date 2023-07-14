@@ -166,11 +166,7 @@ class HDFS:
 
         try:
             dm = dmPython.connect(
-                user="weiyin",
-                password="lamweiyin",
-                server="36.140.31.145",
-                port="31826",
-                autoCommit=True,
+                "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
             )
             dmc = dm.cursor()
         except Exception as e:

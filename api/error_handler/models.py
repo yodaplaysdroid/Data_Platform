@@ -6,15 +6,8 @@ from datetime import datetime
 class Dameng:
     def __init__(
         self,
-        username="weiyin",
-        password="lamweiyin",
-        server="36.140.31.145",
-        port="31826",
     ) -> None:
-        self.username = username
-        self.password = password
-        self.server = server
-        self.port = port
+        self.cred = "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
         return
 
     # 连接达梦数据库
@@ -22,13 +15,7 @@ class Dameng:
     # status: -1 -> 连接失败
     def connect(self) -> int:
         try:
-            self.connection = dmPython.connect(
-                user=self.username,
-                password=self.password,
-                server=self.server,
-                port=self.port,
-                autoCommit=True,
-            )
+            self.connection = dmPython.connect(self.cred)
             self.cursor = self.connection.cursor()
             return 0
         except Exception as e:

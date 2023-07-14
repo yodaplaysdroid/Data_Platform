@@ -46,16 +46,14 @@ columns = {
 }
 
 
+# 普通用户查询数据库的接口
+# 不能用于执行语句，仅支持 DQL 语句
 @csrf_exempt
 def execute(query: str) -> dict:
     res = {"status": None, "results": []}
     try:
         connection = dmPython.connect(
-            user="dbuser",
-            password="dbuser123",
-            server="36.140.31.145",
-            port="31826",
-            autoCommit=False,
+            "dbuser/dbuser123@dm8-dmserver.cnsof17014913-system.svc:5236"
         )
         cursor = connection.cursor()
         try:
@@ -71,6 +69,7 @@ def execute(query: str) -> dict:
     return res
 
 
+# 调用以上 execute 的函数
 @csrf_exempt
 def query(request):
     if request.method == "GET":
@@ -79,16 +78,13 @@ def query(request):
     return JsonResponse(res)
 
 
+# 导出并下载数据库（excel 格式）
 @csrf_exempt
 def download(request):
     if request.method == "GET":
         if request.GET.get("mode") == "generate":
             connection = dmPython.connect(
-                user="weiyin",
-                password="lamweiyin",
-                server="36.140.31.145",
-                port="31826",
-                autoCommit=False,
+                "dbuser/dbuser123@dm8-dmserver.cnsof17014913-system.svc:5236"
             )
             cursor = connection.cursor()
             df = {}

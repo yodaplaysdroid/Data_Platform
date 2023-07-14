@@ -1,22 +1,14 @@
 import dmPython
 
 
+# admin 用户的数据库查询函数
+# 此函数用于 select 类型的查询语句，不适合执行语句
 def db_query(
-    query: str,
-    username="weiyin",
-    password="lamweiyin",
-    server="36.140.31.145",
-    port="31826",
+    query: str, cred="weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
 ) -> dict:
     res = {}
     try:
-        connection = dmPython.connect(
-            user=username,
-            password=password,
-            server=server,
-            port=port,
-            autoCommit=True,
-        )
+        connection = dmPython.connect(cred)
         cursor = connection.cursor()
         cursor.execute(query)
         res["results"] = [list(result) for result in cursor.fetchall()]
@@ -27,22 +19,14 @@ def db_query(
     return res
 
 
+# admin 用户的数据库执行函数
+# 用于更改 / 执行某些命令的函数，不反馈查询结果
 def db_exec(
-    query: str,
-    username="weiyin",
-    password="lamweiyin",
-    server="36.140.31.145",
-    port="31826",
+    query: str, cred="weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
 ) -> dict:
     res = {}
     try:
-        connection = dmPython.connect(
-            user=username,
-            password=password,
-            server=server,
-            port=port,
-            autoCommit=True,
-        )
+        connection = dmPython.connect(cred)
         cursor = connection.cursor()
         cursor.execute(query)
         res["status"] = 0
@@ -53,6 +37,7 @@ def db_exec(
     return res
 
 
+# 更新记录个数的函数
 def record_refresh() -> dict:
     res = {}
     res["status"] = 0
