@@ -8,7 +8,7 @@ def db_query(
 ) -> dict:
     res = {}
     try:
-        connection = dmPython.connect(cred)
+        connection = dmPython.connect(cred, autoCommit=False)
         cursor = connection.cursor()
         cursor.execute(query)
         res["results"] = [list(result) for result in cursor.fetchall()]

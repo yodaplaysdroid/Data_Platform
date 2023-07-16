@@ -89,7 +89,7 @@ def download(request):
             cursor = connection.cursor()
             df = {}
             for table in tables:
-                cursor.execute((f"select * from {table}"))
+                cursor.execute((f"select * from WEIYIN.{table}"))
                 results = cursor.fetchall()
                 df[table] = pd.DataFrame(results, columns=columns[table])
 
