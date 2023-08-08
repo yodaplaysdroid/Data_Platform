@@ -16,6 +16,7 @@ import Local from "./Local";
 
 export default function Menu() {
   const [open, setOpen] = useState(false);
+
   function handleOpen(e: React.MouseEvent) {
     setFs(e.currentTarget.id);
     setOpen(true);

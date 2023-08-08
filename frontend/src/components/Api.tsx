@@ -106,7 +106,7 @@ export default function Api() {
     let sql = "";
     if (query == "") {
       if (table != "") {
-        sql += `SELECT * FROM ${table}`;
+        sql += `SELECT * FROM DT.${table}`;
         if (search != "") {
           sql += " WHERE";
           for (let i in columns) {
@@ -132,10 +132,10 @@ export default function Api() {
     }
     console.log(sql);
     console.log(
-      `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(sql)}`
+      `http://36.140.31.145:31684/api/?query=${encodeURIComponent(sql)}`
     );
 
-    fetch(`http://36.140.31.145:31684/dm/?query=${encodeURIComponent(sql)}`)
+    fetch(`http://36.140.31.145:31684/api/?query=${encodeURIComponent(sql)}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -195,9 +195,11 @@ export default function Api() {
                 <Typography sx={{ p: 2 }}>
                   主机地址: 36.140.31.145:31826
                   <br />
-                  用户名: dbuser
+                  用户名: dmuser
                   <br />
-                  用户密码: dbuser123
+                  用户密码: Dameng123
+                  <br />
+                  Schema: DT
                   <br />
                   API 访问地址: http://36.140.31.145:31684/api/?query=
                   <br />

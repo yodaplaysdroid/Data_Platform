@@ -49,6 +49,26 @@ class HDFS:
             res["status"] = -1
         return res
 
+    def list_sheets(self, filename: str) -> dict:
+        res = {"results": []}
+        try:
+            os.system(f"rclone copy {self.directory}{filename} /tmp")
+            os.system(f"mv /tmp/{filename} /tmp/hdfs")
+        except Exception as e:
+            print("Connection Error / File Not Found:", e)
+            res["status"] = -1
+            return res
+
+        # 加载文件为 pandas dataframe 对象
+        try:
+            excelfile = pd.ExcelFile("/tmp/hdfs")
+            res["status"] = 0
+            res["results"] = excelfile.sheet_names
+        except Exception as e:
+            print("File Reading Error", e)
+            res["status"] = -2
+            return res
+
     # 验证身份证格式
     def __is_valid_id(self, id: str) -> bool:
         # 省份代码集
@@ -152,7 +172,7 @@ class HDFS:
         filetype: str,
         filename: str,
         write_table: str,
-        delete_columns: list,
+        use_columns: list,
         sheet_name="",
     ) -> dict:
         res = {}
@@ -166,7 +186,7 @@ class HDFS:
 
         try:
             dm = dmPython.connect(
-                "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+                "dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
             )
             dmc = dm.cursor()
         except Exception as e:
@@ -179,14 +199,12 @@ class HDFS:
         # 加载文件为 pandas dataframe 对象
         if filetype == "csv":
             try:
-                df = pd.read_csv("/tmp/hdfs", encoding="gbk", quotechar="'").drop(
-                    columns=delete_columns
+                df = pd.read_csv(
+                    "/tmp/hdfs", encoding="gbk", quotechar="'", usecols=use_columns
                 )
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", quotechar="'").drop(
-                        columns=delete_columns
-                    )
+                    df = pd.read_csv("/tmp/hdfs", quotechar="'", usecols=use_columns)
                 except Exception as f:
                     print(f)
                 print("File Reading Error", e)
@@ -195,12 +213,16 @@ class HDFS:
         elif filetype == "txt":
             try:
                 df = pd.read_csv(
-                    "/tmp/hdfs", sep="\t", encoding="gbk", quotechar="'"
-                ).drop(columns=delete_columns)
+                    "/tmp/hdfs",
+                    sep="\t",
+                    encoding="gbk",
+                    quotechar="'",
+                    usecols=use_columns,
+                )
             except Exception as e:
                 try:
-                    df = pd.read_csv("/tmp/hdfs", sep="\t", quotechar="'").drop(
-                        columns=delete_columns
+                    df = pd.read_csv(
+                        "/tmp/hdfs", sep="\t", quotechar="'", usecols=use_columns
                     )
                 except Exception as f:
                     print(f)
@@ -209,8 +231,8 @@ class HDFS:
                 return res
         else:
             try:
-                df = pd.read_excel("/tmp/hdfs", sheet_name=sheet_name).drop(
-                    columns=delete_columns
+                df = pd.read_excel(
+                    "/tmp/hdfs", sheet_name=sheet_name, usecols=use_columns
                 )
             except Exception as e:
                 print("File Reading Error", e)

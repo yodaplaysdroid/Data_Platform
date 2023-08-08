@@ -8,12 +8,7 @@ import {
   Snackbar,
   IconButton,
   Alert,
-  Card,
-  CardContent,
-  Container,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Fragment, useState } from "react";
 
@@ -40,8 +35,9 @@ export default function Mysql() {
 
   const [page, setPage] = useState(1);
   const [columns, setColumns] = useState<any[]>([]);
-  const [checked, setChecked] = useState<number[]>([]);
-  const [countones, setCountones] = useState(0);
+  const [checked, setChecked] = useState(Array(20).fill(""));
+  const [eligible, setEligible] = useState(false);
+  const [sheets, setSheets] = useState<any[]>([]);
   const [loading, setLoading] = useState(
     <LinearProgress variant="determinate" value={0} />
   );
@@ -107,6 +103,17 @@ export default function Mysql() {
         });
     }
   }
+  function handleFileType(e: SelectChangeEvent<string>) {
+    setFileType(e.target.value);
+    if (e.target.value == "xls") {
+      fetch("http://36.140.31.145:31684/local_input/get_sheets/")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          setSheets(data.results);
+        });
+    }
+  }
   function handleConfirm() {
     const requestOptions = {
       method: "POST",
@@ -124,37 +131,27 @@ export default function Mysql() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
-        setChecked(Array(tmp[0].length).fill(1));
-        setCountones(tmp[0].length);
+        setChecked(Array(tmp[0].length).fill(""));
         setPage(3);
       });
   }
-  function handleChange(e: any) {
-    console.log(e.target.id);
+  function handleChange(e: any, index: number) {
+    console.log(checked);
     let tmp = checked;
-    tmp[Number(e.target.id)] === 0
-      ? (tmp[Number(e.target.id)] = 1)
-      : (tmp[Number(e.target.id)] = 0);
+    tmp[index] = e.target.value;
+    console.log(tmp);
     setChecked(tmp);
-    const countOnes = checked.reduce((count, element) => {
-      if (element === 1) {
-        return count + 1;
+    setEligible(true);
+    for (let c in tmp) {
+      if (tmp[c] == "") {
+        setEligible(false);
+        break;
       }
-      return count;
-    }, 0);
-    setCountones(countOnes);
-    console.log(checked, countOnes);
+    }
   }
   function handleSubmit() {
     setLoading(<LinearProgress />);
     setSubmitted(true);
-    let deleteColumns: string[] = [];
-    for (let c in checked) {
-      if (checked[c] === 0) {
-        deleteColumns.push(columns[0][c]);
-      }
-    }
-    console.log(deleteColumns);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -162,7 +159,7 @@ export default function Mysql() {
         filetype: fileType,
         writetable: writeTable,
         sheetname: sheetName,
-        deletecolumns: deleteColumns,
+        usecolumns: checked,
       }),
     };
     console.log(requestOptions);
@@ -258,7 +255,7 @@ export default function Mysql() {
             <div>{"文件类型: "}</div>
             <Select
               value={fileType}
-              onChange={(e) => setFileType(e.target.value)}
+              onChange={handleFileType}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
               size="small"
@@ -283,23 +280,30 @@ export default function Mysql() {
           >
             <div>{"工作表名称: "}</div>
             {fileType === "xls" ? (
-              <TextField
-                id="sheetName"
-                label="工作表（EXCEL）"
-                variant="outlined"
-                size="small"
-                sx={{ width: 200 }}
+              <Select
+                value={sheetName}
                 onChange={(e) => setSheetName(e.target.value)}
-              />
-            ) : (
-              <TextField
-                id="sheetName"
-                label="工作表（EXCEL）"
-                variant="outlined"
-                disabled
+                displayEmpty
+                inputProps={{ "aria-label": "Without label" }}
                 size="small"
-                sx={{ width: 200 }}
-              />
+                sx={{ marginLeft: "20px", width: 200 }}
+              >
+                <MenuItem value=""></MenuItem>
+                {sheets.map((item) => (
+                  <MenuItem value={item}>{item}</MenuItem>
+                ))}
+              </Select>
+            ) : (
+              <Select
+                defaultValue={""}
+                disabled
+                displayEmpty
+                inputProps={{ "aria-label": "Without label" }}
+                size="small"
+                sx={{ marginLeft: "20px", width: 200 }}
+              >
+                <MenuItem value=""></MenuItem>
+              </Select>
             )}
           </Typography>
           <br />
@@ -316,48 +320,40 @@ export default function Mysql() {
       ) : null}
       {page === 3 ? (
         <>
-          <Container
-            sx={{
-              display: "flex",
-              justifyContent: "space-around",
-              marginTop: 5,
-              marginBottom: 5,
-            }}
-          >
-            <Card id="columns1" sx={{ width: 250 }}>
-              <CardContent>
-                <Typography gutterBottom variant="h6" component="div">
-                  源数据表
-                </Typography>
-                <FormGroup>
-                  {columns[0].map((item: string, index: number) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          defaultChecked
-                          id={index.toString()}
-                          onChange={handleChange}
-                        />
-                      }
-                      label={item}
-                    />
-                  ))}
-                </FormGroup>
-              </CardContent>
-            </Card>
-            <Card id="columns1" sx={{ width: 250 }}>
-              <CardContent>
-                <Typography gutterBottom variant="h6" component="div">
-                  目标数据表
-                </Typography>
-                {columns[1].map((item: string) => (
+          {columns[1].map((item: string, index: number) => (
+            <Typography
+              variant="button"
+              sx={{
+                fontSize: 18,
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                marginTop: 1,
+                marginBottom: 1,
+              }}
+            >
+              <div>
+                {item}
+                {": "}
+              </div>
+
+              <Select
+                onChange={(e) => handleChange(e, index)}
+                displayEmpty
+                inputProps={{ "aria-label": "Without label" }}
+                size="small"
+                sx={{ marginLeft: "20px", width: 150 }}
+                defaultValue={checked[index]}
+              >
+                <MenuItem value=""></MenuItem>
+                {columns[0].map((item: string) => (
                   <MenuItem value={item}>{item}</MenuItem>
                 ))}
-              </CardContent>
-            </Card>
-          </Container>
+              </Select>
+            </Typography>
+          ))}
 
-          {columns[1].length === countones ? (
+          {eligible ? (
             <Button fullWidth onClick={handleSubmit}>
               <Typography variant="h6">提交</Typography>
             </Button>

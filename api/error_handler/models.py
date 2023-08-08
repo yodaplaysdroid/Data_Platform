@@ -7,7 +7,7 @@ class Dameng:
     def __init__(
         self,
     ) -> None:
-        self.cred = "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+        self.cred = "dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
         return
 
     # 连接达梦数据库

@@ -180,7 +180,7 @@ class Mysql_Input:
             # 连接达梦数据库
             try:
                 dm = dmPython.connect(
-                    "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+                    "dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
                 )
                 dmc = dm.cursor()
             except Exception as e:

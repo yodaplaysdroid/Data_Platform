@@ -3,6 +3,21 @@ import dmPython
 from datetime import datetime
 
 
+def list_sheets() -> dict:
+    res = {"results": []}
+
+    # 加载文件为 pandas dataframe 对象
+    try:
+        excelfile = pd.ExcelFile("/tmp/local")
+        res["status"] = 0
+        res["results"] = excelfile.sheet_names
+    except Exception as e:
+        print("File Reading Error", e)
+        res["status"] = -2
+
+    return res
+
+
 # 验证身份证格式
 def is_valid_id(id: str) -> bool:
     # 省份代码集
@@ -104,15 +119,13 @@ def get_columns(filetype: str, sheet_name: str) -> dict:
 def extract(
     write_table: str,
     filetype: str,
-    delete_columns: list,
+    use_columns: list,
     sheet_name="",
 ) -> dict:
     res = {}
 
     try:
-        dm = dmPython.connect(
-            "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
-        )
+        dm = dmPython.connect("dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236")
         dmc = dm.cursor()
     except Exception as e:
         print(e)
@@ -122,13 +135,13 @@ def extract(
     # 加载文件为 pandas dataframe 对象
     if filetype == "csv":
         try:
-            df = pd.read_csv("/tmp/local", encoding="gbk", quotechar="'").drop(
-                columns=delete_columns
+            df = pd.read_csv(
+                "/tmp/local", encoding="gbk", quotechar="'", usecols=use_columns
             )
         except Exception as e:
             try:
-                df = pd.read_csv("/tmp/local", encoding="utf-8", quotechar="'").drop(
-                    columns=delete_columns
+                df = pd.read_csv(
+                    "/tmp/local", encoding="utf-8", quotechar="'", usecols=use_columns
                 )
             except Exception as f:
                 print(f)
@@ -138,13 +151,21 @@ def extract(
     elif filetype == "txt":
         try:
             df = pd.read_csv(
-                "/tmp/local", sep="\t", encoding="gbk", quotechar="'"
-            ).drop(columns=delete_columns)
+                "/tmp/local",
+                sep="\t",
+                encoding="gbk",
+                quotechar="'",
+                usecols=use_columns,
+            )
         except Exception as e:
             try:
                 df = pd.read_csv(
-                    "/tmp/local", sep="\t", encoding="utf-8", quotechar="'"
-                ).drop(columns=delete_columns)
+                    "/tmp/local",
+                    sep="\t",
+                    encoding="utf-8",
+                    quotechar="'",
+                    usecols=use_columns,
+                )
             except Exception as f:
                 print(f)
                 print("File Reading Error", e)
@@ -152,9 +173,7 @@ def extract(
                 return res
     else:
         try:
-            df = pd.read_excel("/tmp/local", sheet_name=sheet_name).drop(
-                columns=delete_columns
-            )
+            df = pd.read_excel("/tmp/local", sheet_name=sheet_name, usecols=use_columns)
         except Exception as e:
             print("File Reading Error", e)
             res["status"] = -2

@@ -10,12 +10,6 @@ import {
   Snackbar,
   IconButton,
   Alert,
-  Card,
-  CardContent,
-  Container,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
 } from "@mui/material";
 import { Fragment, useState } from "react";
 
@@ -41,8 +35,8 @@ export default function Mysql() {
   const [tables, setTables] = useState([]);
   const [page, setPage] = useState(1);
   const [columns, setColumns] = useState<any[]>([]);
-  const [checked, setChecked] = useState<number[]>([]);
-  const [countones, setCountones] = useState(0);
+  const [checked, setChecked] = useState(Array(20).fill(""));
+  const [eligible, setEligible] = useState(false);
   const [loading, setLoading] = useState(
     <LinearProgress variant="determinate" value={0} />
   );
@@ -188,37 +182,27 @@ export default function Mysql() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
-        setChecked(Array(tmp[0].length).fill(1));
-        setCountones(tmp[0].length);
+        setChecked(Array(tmp[0].length).fill(""));
         setPage(4);
       });
   }
-  function handleChange(e: any) {
-    console.log(e.target.id);
+  function handleChange(e: any, index: number) {
+    console.log(checked);
     let tmp = checked;
-    tmp[Number(e.target.id)] === 0
-      ? (tmp[Number(e.target.id)] = 1)
-      : (tmp[Number(e.target.id)] = 0);
+    tmp[index] = e.target.value;
+    console.log(tmp);
     setChecked(tmp);
-    const countOnes = checked.reduce((count, element) => {
-      if (element === 1) {
-        return count + 1;
+    setEligible(true);
+    for (let c in tmp) {
+      if (tmp[c] == "") {
+        setEligible(false);
+        break;
       }
-      return count;
-    }, 0);
-    setCountones(countOnes);
-    console.log(checked, countOnes);
+    }
   }
   function handleSubmit() {
     setLoading(<LinearProgress />);
     setSubmitted(true);
-    let selectColumns: string[] = [];
-    for (let c in checked) {
-      if (checked[c] === 1) {
-        selectColumns.push(columns[0][c]);
-      }
-    }
-    console.log(selectColumns);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -229,7 +213,7 @@ export default function Mysql() {
         database: database,
         readtable: readTable,
         writetable: writeTable,
-        selectcolumns: selectColumns,
+        selectcolumns: checked,
       }),
     };
     console.log(requestOptions);
@@ -473,48 +457,40 @@ export default function Mysql() {
       ) : null}
       {page === 4 ? (
         <>
-          <Container
-            sx={{
-              display: "flex",
-              justifyContent: "space-around",
-              marginTop: 5,
-              marginBottom: 5,
-            }}
-          >
-            <Card id="columns1" sx={{ width: 250 }}>
-              <CardContent>
-                <Typography gutterBottom variant="h6" component="div">
-                  源数据表
-                </Typography>
-                <FormGroup>
-                  {columns[0].map((item: string, index: number) => (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          defaultChecked
-                          id={index.toString()}
-                          onChange={handleChange}
-                        />
-                      }
-                      label={item}
-                    />
-                  ))}
-                </FormGroup>
-              </CardContent>
-            </Card>
-            <Card id="columns1" sx={{ width: 250 }}>
-              <CardContent>
-                <Typography gutterBottom variant="h6" component="div">
-                  目标数据表
-                </Typography>
-                {columns[1].map((item: string) => (
+          {columns[1].map((item: string, index: number) => (
+            <Typography
+              variant="button"
+              sx={{
+                fontSize: 18,
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                marginTop: 1,
+                marginBottom: 1,
+              }}
+            >
+              <div>
+                {item}
+                {": "}
+              </div>
+
+              <Select
+                onChange={(e) => handleChange(e, index)}
+                displayEmpty
+                inputProps={{ "aria-label": "Without label" }}
+                size="small"
+                sx={{ marginLeft: "20px", width: 150 }}
+                defaultValue={checked[index]}
+              >
+                <MenuItem value=""></MenuItem>
+                {columns[0].map((item: string) => (
                   <MenuItem value={item}>{item}</MenuItem>
                 ))}
-              </CardContent>
-            </Card>
-          </Container>
+              </Select>
+            </Typography>
+          ))}
 
-          {columns[1].length === countones ? (
+          {eligible ? (
             <Button fullWidth onClick={handleSubmit}>
               <Typography variant="h6">提交</Typography>
             </Button>

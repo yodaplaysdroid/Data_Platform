@@ -53,7 +53,7 @@ def execute(query: str) -> dict:
     res = {"status": None, "results": []}
     try:
         connection = dmPython.connect(
-            "dbuser/dbuser123@dm8-dmserver.cnsof17014913-system.svc:5236"
+            "dmuser/Dameng123@dm8-dmserver.cnsof17014913-system.svc:5236"
         )
         cursor = connection.cursor()
         try:
@@ -84,12 +84,12 @@ def download(request):
     if request.method == "GET":
         if request.GET.get("mode") == "generate":
             connection = dmPython.connect(
-                "dbuser/dbuser123@dm8-dmserver.cnsof17014913-system.svc:5236"
+                "dmuser/Dameng123@dm8-dmserver.cnsof17014913-system.svc:5236"
             )
             cursor = connection.cursor()
             df = {}
             for table in tables:
-                cursor.execute((f"select * from WEIYIN.{table}"))
+                cursor.execute((f"select * from DT.{table}"))
                 results = cursor.fetchall()
                 df[table] = pd.DataFrame(results, columns=columns[table])
 

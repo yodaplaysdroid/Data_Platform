@@ -63,6 +63,29 @@ class Minio_Input:
             res["status"] = -1
         return res
 
+    def list_sheets(self, bucket: str, directory: str) -> dict:
+        res = {"results": []}
+        if self.test_connection()["status"] != 0:
+            res["status"] = -1
+
+        try:
+            self.conn.fget_object(bucket, directory, "/tmp/minio")
+        except Exception as e:
+            print(e)
+            res["status"] = -2
+            return res
+
+        # 加载文件为 pandas dataframe 对象
+        try:
+            excelfile = pd.ExcelFile("/tmp/minio")
+            res["status"] = 0
+            res["results"] = excelfile.sheet_names
+        except Exception as e:
+            print("File Reading Error", e)
+            res["status"] = -2
+
+        return res
+
     # 验证身份证格式
     def __is_valid_id(self, id: str) -> bool:
         # 省份代码集
@@ -180,7 +203,7 @@ class Minio_Input:
         directory: str,
         write_table: str,
         filetype: str,
-        delete_columns: list,
+        use_columns: list,
         sheet_name="",
     ) -> dict:
         res = {}
@@ -189,7 +212,7 @@ class Minio_Input:
 
         try:
             dm = dmPython.connect(
-                "weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+                "dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
             )
             dmc = dm.cursor()
         except Exception as e:
@@ -207,14 +230,17 @@ class Minio_Input:
         # 加载文件为 pandas dataframe 对象
         if filetype == "csv":
             try:
-                df = pd.read_csv("/tmp/minio", encoding="gbk", quotechar="'").drop(
-                    columns=delete_columns
+                df = pd.read_csv(
+                    "/tmp/minio", encoding="gbk", quotechar="'", usecols=use_columns
                 )
             except Exception as e:
                 try:
                     df = pd.read_csv(
-                        "/tmp/minio", encoding="utf-8", quotechar="'"
-                    ).drop(columns=delete_columns)
+                        "/tmp/minio",
+                        encoding="utf-8",
+                        quotechar="'",
+                        usecols=use_columns,
+                    )
                 except Exception as f:
                     print(f)
                     print("File Reading Error", e)
@@ -223,13 +249,21 @@ class Minio_Input:
         elif filetype == "txt":
             try:
                 df = pd.read_csv(
-                    "/tmp/minio", sep="\t", encoding="gbk", quotechar="'"
-                ).drop(columns=delete_columns)
+                    "/tmp/minio",
+                    sep="\t",
+                    encoding="gbk",
+                    quotechar="'",
+                    usecols=use_columns,
+                )
             except Exception as e:
                 try:
                     df = pd.read_csv(
-                        "/tmp/minio", sep="\t", encoding="utf-8", quotechar="'"
-                    ).drop(columns=delete_columns)
+                        "/tmp/minio",
+                        sep="\t",
+                        encoding="utf-8",
+                        quotechar="'",
+                        usecols=use_columns,
+                    )
                 except Exception as f:
                     print(f)
                     print("File Reading Error", e)
@@ -237,8 +271,8 @@ class Minio_Input:
                     return res
         else:
             try:
-                df = pd.read_excel("/tmp/minio", sheet_name=sheet_name).drop(
-                    columns=delete_columns
+                df = pd.read_excel(
+                    "/tmp/minio", sheet_name=sheet_name, usecols=use_columns
                 )
             except Exception as e:
                 print("File Reading Error", e)

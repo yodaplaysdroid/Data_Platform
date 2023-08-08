@@ -74,6 +74,16 @@ def send_file(request):
 # status: 99 -> request method 不对
 # response = {status: int}
 @csrf_exempt
+def get_sheets(request):
+    res = models.list_sheets()
+    print(res)
+    return JsonResponse(res)
+
+
+# status: 0 -> 迁移成功
+# status: 99 -> request method 不对
+# response = {status: int}
+@csrf_exempt
 def get_columns(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -101,9 +111,9 @@ def data_transfer(request):
         filetype = data.get("filetype")
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
-        delete_columns = data.get("deletecolumns")
+        use_columns = data.get("usecolumns")
 
-        res = models.extract(write_table, filetype, delete_columns, sheet_name)
+        res = models.extract(write_table, filetype, use_columns, sheet_name)
         print(res)
         return JsonResponse(res)
     else:

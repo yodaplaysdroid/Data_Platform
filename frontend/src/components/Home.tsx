@@ -45,8 +45,8 @@ export default function Home() {
   const [ann4, setAnn4] = useState<any[]>([]);
   const [ann5, setAnn5] = useState<any[]>([]);
   const [ann6, setAnn6] = useState<any[]>([]);
-  let tmp = localStorage.getItem("an5v");
-  let an5v = tmp ? tmp : "";
+  const [an3v, setAn3v] = useState("");
+  const [an5v, setAn5v] = useState("");
 
   if (status === 1) {
     fetch("http://36.140.31.145:31684/dm/refresh/");
@@ -55,6 +55,24 @@ export default function Home() {
       .then((data) => {
         setStatus(data.status);
         setRes(data.results);
+      });
+
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select+v+from+ops+where+k+%3D+%27ann3%27"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        setAn3v(data.results);
+      });
+
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select+v+from+ops+where+k+%3D+%27ann5%27"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        setAn5v(data.results);
       });
 
     fetch(
@@ -152,10 +170,6 @@ export default function Home() {
   }
   function handleChangeDate() {
     console.log(year1, year2, month1, month2);
-    localStorage.setItem("year1", year1);
-    localStorage.setItem("year2", year2);
-    localStorage.setItem("month1", month1);
-    localStorage.setItem("month2", month2);
     fetch("http://36.140.31.145:31684/dm/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -180,14 +194,22 @@ export default function Home() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-      });
+        setAn3v(`${year1}/${month1} ~ ${year2}/${month2}`);
+      })
+      .then(() =>
+        fetch("http://36.140.31.145:31684/dm/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `update ops set v = '${year1}/${month1} ~ ${year2}/${month2}' where k = 'ann3'`,
+          }),
+        })
+      );
   }
   function handleChangeGraph(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     type: string[]
   ) {
-    localStorage.setItem("an5k", type[0]);
-    localStorage.setItem("an5v", e.currentTarget.id);
     const id = e.currentTarget.id;
     fetch("http://36.140.31.145:31684/dm/", {
       method: "POST",
@@ -195,15 +217,26 @@ export default function Home() {
       body: JSON.stringify({
         query: "drop view 分析5",
       }),
-    }).then(() => {
-      fetch("http://36.140.31.145:31684/dm/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `create view 分析5 as select ${type[1]} as x, 数量吞吐量, 总货重 from 分析五 where ${type[0]} = '${id}'`,
-        }),
+    })
+      .then(() => {
+        fetch("http://36.140.31.145:31684/dm/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `create view 分析5 as select ${type[1]} as x, 数量吞吐量, 总货重 from 分析五 where ${type[0]} = '${id}'`,
+          }),
+        });
+      })
+      .then(() => {
+        setAn5v(`${type[0]}: ${id}`);
+        fetch("http://36.140.31.145:31684/dm/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `update ops set v = '${type[0]}: ${id}' where k = 'ann5'`,
+          }),
+        });
       });
-    });
   }
   const [anchorEl1, setAnchorEl1] = useState<HTMLButtonElement | null>(null);
 
@@ -305,7 +338,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 600 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670041998813306881&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670041998813306881&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -329,7 +362,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 380 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670126477594599425&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670126477594599425&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -353,7 +386,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 480 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1675858839561314306&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1675858839561314306&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -377,7 +410,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 800 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670113882892410881&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670113882892410881&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -420,12 +453,12 @@ export default function Home() {
                 fontSize={18}
                 sx={{ marginBottom: 1 }}
               >
-                货物吞吐同比环比分析
+                货物吞吐同比环比分析（{an3v}）
               </Typography>
               <br />
               <iframe
                 style={{ height: 400, width: 1000 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670457086149926913&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670457086149926913&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -667,7 +700,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 1380 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670663863973978113&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670663863973978113&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>
@@ -822,7 +855,7 @@ export default function Home() {
               <br />
               <iframe
                 style={{ height: 300, width: 680 }}
-                src="https://datav.dameng.com/dataview/publish/page.html?pageId=1670137009093484545&isTemplate=0"
+                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670137009093484545&isTemplate=0"
                 frameBorder={0}
               ></iframe>
             </Card>

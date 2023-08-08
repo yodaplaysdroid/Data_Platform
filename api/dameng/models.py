@@ -4,7 +4,7 @@ import dmPython
 # admin 用户的数据库查询函数
 # 此函数用于 select 类型的查询语句，不适合执行语句
 def db_query(
-    query: str, cred="weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+    query: str, cred="dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
 ) -> dict:
     res = {}
     try:
@@ -22,7 +22,7 @@ def db_query(
 # admin 用户的数据库执行函数
 # 用于更改 / 执行某些命令的函数，不反馈查询结果
 def db_exec(
-    query: str, cred="weiyin/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
+    query: str, cred="dt/lamweiyin@dm8-dmserver.cnsof17014913-system.svc:5236"
 ) -> dict:
     res = {}
     try:

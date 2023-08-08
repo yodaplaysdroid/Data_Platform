@@ -141,12 +141,12 @@ id int identity(1, 1));
 // 记录信息（记录所有表中的记录个数）
 
 create table 记录信息 (表名 varchar(100), 记录个数 int);
-insert into table 记录信息 values ('物流公司', 0);
-insert into table 记录信息 values ('客户信息', 0);
-insert into table 记录信息 values ('物流信息', 0);
-insert into table 记录信息 values ('集装箱动态', 0);
-insert into table 记录信息 values ('装货表', 0);
-insert into table 记录信息 values ('卸货表', 0);
+insert into 记录信息 values ('物流公司', 0);
+insert into 记录信息 values ('客户信息', 0);
+insert into 记录信息 values ('物流信息', 0);
+insert into 记录信息 values ('集装箱动态', 0);
+insert into 记录信息 values ('装货表', 0);
+insert into 记录信息 values ('卸货表', 0);
 
 // 分析试图
 

@@ -70,6 +70,28 @@ def test_connection(request):
 # status: 99 -> request method 不对
 # response = {status: int}
 @csrf_exempt
+def get_sheets(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        directory = data.get("directory")
+        namenode = data.get("namenode")
+        username = data.get("username")
+        filename = data.get("filename")
+
+        hadoop = HDFS(directory, namenode, username)
+        res = hadoop.list_sheets(filename)
+        print(res)
+        return JsonResponse(res)
+    else:
+        return JsonResponse(
+            {"status": 99, "message": "suppose to use POST requests instead of GET"}
+        )
+
+
+# status: 0 -> 迁移成功
+# status: 99 -> request method 不对
+# response = {status: int}
+@csrf_exempt
 def get_columns(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -106,12 +128,10 @@ def data_transfer(request):
         filetype = data.get("filetype")
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
-        delete_columns = data.get("deletecolumns")
+        use_columns = data.get("usecolumns")
 
         hadoop = HDFS(directory, namenode, username)
-        res = hadoop.extract(
-            filetype, filename, write_table, delete_columns, sheet_name
-        )
+        res = hadoop.extract(filetype, filename, write_table, use_columns, sheet_name)
         print(res)
         return JsonResponse(res)
     else:

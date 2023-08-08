@@ -111,6 +111,29 @@ def get_files(request):
 
 # status: 0 -> 迁移成功
 # status: 99 -> request method 不对
+# response = {status: int, objects: list<str>}
+@csrf_exempt
+def get_sheets(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        endpoint = data.get("endpoint")
+        access_key = data.get("accesskey")
+        secret_key = data.get("secretkey")
+        bucket = data.get("bucket")
+        directory = data.get("directory")
+
+        minn = Minio_Input(endpoint, access_key, secret_key)
+        res = minn.list_sheets(bucket, directory)
+        print(res)
+        return JsonResponse(res)
+    else:
+        return JsonResponse(
+            {"status": 99, "message": "suppose to use POST requests instead of GET"}
+        )
+
+
+# status: 0 -> 迁移成功
+# status: 99 -> request method 不对
 # response = {status: int}
 @csrf_exempt
 def get_columns(request):
@@ -151,11 +174,11 @@ def data_transfer(request):
         filetype = data.get("filetype")
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
-        delete_columns = data.get("deletecolumns")
+        use_columns = data.get("usecolumns")
 
         minn = Minio_Input(endpoint, access_key, secret_key)
         res = minn.extract(
-            bucket, directory, write_table, filetype, delete_columns, sheet_name
+            bucket, directory, write_table, filetype, use_columns, sheet_name
         )
         print(res)
         return JsonResponse(res)
