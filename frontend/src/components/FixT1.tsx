@@ -66,8 +66,8 @@ export default function FixT1() {
   for (let i in data) {
     rows.push(
       createData(
+        data[i][7],
         data[i][6],
-        data[i][5],
         data[i][0],
         data[i][1],
         data[i][2],

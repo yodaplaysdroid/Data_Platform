@@ -6,6 +6,7 @@ create table 物流公司 (
 联系人 varchar(50),
 电话 varchar(20),
 省市区 varchar(100),
+username varchar(100),
 primary key(客户编号));
 
 create table 客户信息 (
@@ -13,6 +14,7 @@ create table 客户信息 (
 客户编号 varchar(20) not null,
 手机号 varchar(20) not null unique,
 省市区 varchar(100),
+username varchar(100),
 primary key(客户编号));
 
 create table 物流信息 (
@@ -23,6 +25,7 @@ create table 物流信息 (
 集装箱箱号 varchar(50) not null,
 货物名称 varchar(50) not null,
 货重_吨 varchar(50) not null,
+username varchar(100),
 primary key(提单号));
 
 create table 集装箱动态 (
@@ -33,6 +36,7 @@ create table 集装箱动态 (
 堆场位置 varchar(100) not null,
 操作 varchar(50) not null,
 操作日期 varchar(50) not null,
+username varchar(100),
 primary key(集装箱箱号, 提单号, 操作));
 
 create table 装货表 (
@@ -48,6 +52,7 @@ create table 装货表 (
 箱尺寸_TEU varchar(100),
 启运地 varchar(100),
 目的地 varchar(100),
+username varchar(100),
 primary key(提单号));
 
 create table 卸货表 (
@@ -63,6 +68,7 @@ create table 卸货表 (
 箱尺寸_TEU varchar(100),
 启运地 varchar(100),
 目的地 varchar(100),
+username varchar(100),
 primary key(提单号));
 
 // 创建 tmp 表（存储错误数据）
@@ -73,6 +79,7 @@ create table 物流公司tmp (
 联系人 varchar(50),
 电话 varchar(20),
 省市区 varchar(100),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 
@@ -81,6 +88,7 @@ create table 客户信息tmp (
 客户编号 varchar(20),
 手机号 varchar(20),
 省市区 varchar(100),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 
@@ -92,6 +100,7 @@ create table 物流信息tmp (
 集装箱箱号 varchar(50),
 货物名称 varchar(50),
 货重_吨 varchar(50),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 
@@ -103,6 +112,7 @@ create table 集装箱动态tmp (
 堆场位置 varchar(100),
 操作 varchar(50),
 操作日期 varchar(50),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 
@@ -119,6 +129,7 @@ create table 装货表tmp (
 箱尺寸_TEU varchar(100),
 启运地 varchar(100),
 目的地 varchar(100),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 
@@ -135,6 +146,7 @@ create table 卸货表tmp (
 箱尺寸_TEU varchar(100),
 启运地 varchar(100),
 目的地 varchar(100),
+username varchar(100),
 错误类型 text,
 id int identity(1, 1));
 

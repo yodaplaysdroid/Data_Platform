@@ -171,7 +171,12 @@ class Mysql_Input:
     # status: -1 -> 此表不存在
     # status: >1 -> 数据导入问题（可能出现违规 sql 约束问题）
     def extract(
-        self, database: str, read_table: str, write_table: str, select_columns: list
+        self,
+        database: str,
+        read_table: str,
+        write_table: str,
+        select_columns: list,
+        user: str,
     ) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
@@ -209,10 +214,12 @@ class Mysql_Input:
                 # 治理客户身份证号码
                 if write_table == "客户信息":
                     for result in results:
+                        result = list(result)
+                        result.append(user)
                         try:
                             if self.__is_valid_id(result[1]):
                                 dmc.execute(
-                                    f"insert into {write_table} values {result}"
+                                    f"insert into {write_table} values {tuple(result)}"
                                 )
                             else:
                                 string = list(result)
@@ -232,8 +239,12 @@ class Mysql_Input:
                             count += 1
                 else:
                     for result in results:
+                        result = list(result)
+                        result.append(user)
                         try:
-                            dmc.execute(f"insert into {write_table} values {result}")
+                            dmc.execute(
+                                f"insert into {write_table} values {tuple(result)}"
+                            )
                         except Exception as e:
                             string = list(result)
                             string.append(str(e))

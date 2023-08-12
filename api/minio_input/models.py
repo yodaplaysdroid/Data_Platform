@@ -205,6 +205,7 @@ class Minio_Input:
         filetype: str,
         use_columns: list,
         sheet_name="",
+        user="",
     ) -> dict:
         res = {}
         if self.test_connection()["status"] != 0:
@@ -283,6 +284,8 @@ class Minio_Input:
         count = 0
         if write_table == "客户信息":
             for i, r in df.iterrows():
+                r = list(r)
+                r.append(user)
                 try:
                     if self.__is_valid_id(r[1]):
                         dmc.execute(f"insert into {write_table} values {tuple(r)}")
@@ -302,6 +305,8 @@ class Minio_Input:
                     count += 1
         else:
             for i, r in df.iterrows():
+                r = list(r)
+                r.append(user)
                 try:
                     dmc.execute(f"insert into {write_table} values {tuple(r)}")
                 except Exception as e:

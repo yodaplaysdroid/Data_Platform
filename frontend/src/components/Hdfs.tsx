@@ -149,7 +149,7 @@ export default function Hdfs() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
-        setChecked(Array(tmp[0].length).fill(""));
+        setChecked(Array(tmp[1].length).fill(""));
         setPage(4);
       });
   }
@@ -182,6 +182,7 @@ export default function Hdfs() {
         writetable: writeTable,
         sheetname: sheetName,
         usecolumns: checked,
+        user: localStorage.getItem("user"),
       }),
     };
     console.log(requestOptions);

@@ -91,6 +91,8 @@ def download(request):
             for table in tables:
                 cursor.execute((f"select * from DT.{table}"))
                 results = cursor.fetchall()
+                col = columns[table]
+                col.append("user")
                 df[table] = pd.DataFrame(results, columns=columns[table])
 
             with pd.ExcelWriter("/tmp/download.xlsx") as writer:

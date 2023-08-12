@@ -202,7 +202,7 @@ export default function Minio() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
-        setChecked(Array(tmp[0].length).fill(""));
+        setChecked(Array(tmp[1].length).fill(""));
         setPage(4);
       });
   }
@@ -236,6 +236,7 @@ export default function Minio() {
         writetable: writeTable,
         sheetname: sheetName,
         usecolumns: checked,
+        user: localStorage.getItem("user"),
       }),
     };
     console.log(requestOptions);

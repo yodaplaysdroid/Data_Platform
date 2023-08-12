@@ -129,9 +129,12 @@ def data_transfer(request):
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
         use_columns = data.get("usecolumns")
+        user = data.get("user")
 
         hadoop = HDFS(directory, namenode, username)
-        res = hadoop.extract(filetype, filename, write_table, use_columns, sheet_name)
+        res = hadoop.extract(
+            filetype, filename, write_table, use_columns, sheet_name, user
+        )
         print(res)
         return JsonResponse(res)
     else:

@@ -61,6 +61,7 @@ export default function Edit(props: EditProps) {
       body: JSON.stringify({
         tablename: tableName,
         itemtofix: [itemId, record.slice(0, -2)],
+        user: localStorage.getItem("user"),
       }),
     };
     console.log(requestOptions);

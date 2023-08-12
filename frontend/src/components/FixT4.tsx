@@ -72,8 +72,8 @@ export default function FixT4() {
   for (let i in data) {
     rows.push(
       createData(
+        data[i][9],
         data[i][8],
-        data[i][7],
         data[i][0],
         data[i][1],
         data[i][2],

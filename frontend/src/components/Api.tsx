@@ -96,7 +96,7 @@ export default function Api() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setColumns(data.columns);
+        setColumns([...data.columns, "username"]);
       });
   }
   function handleChangeOrder(e: SelectChangeEvent<string>) {

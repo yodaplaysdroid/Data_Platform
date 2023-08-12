@@ -117,10 +117,7 @@ def get_columns(filetype: str, sheet_name: str) -> dict:
 # status: -10 -> 达梦连不上
 # status: >1 -> 数据导入问题（可能出现违规 sql 约束问题）
 def extract(
-    write_table: str,
-    filetype: str,
-    use_columns: list,
-    sheet_name="",
+    write_table: str, filetype: str, use_columns: list, sheet_name="", user=""
 ) -> dict:
     res = {}
 
@@ -183,6 +180,8 @@ def extract(
     count = 0
     if write_table == "客户信息":
         for i, r in df.iterrows():
+            r = list(r)
+            r.append(user)
             try:
                 if is_valid_id(r[1]):
                     dmc.execute(f"insert into {write_table} values {tuple(r)}")
@@ -202,6 +201,8 @@ def extract(
                 count += 1
     else:
         for i, r in df.iterrows():
+            r = list(r)
+            r.append(user)
             try:
                 dmc.execute(f"insert into {write_table} values {tuple(r)}")
             except Exception as e:

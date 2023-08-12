@@ -98,6 +98,9 @@ def fix_error(request):
         data = json.loads(request.body)
         table_name = data.get("tablename")
         item_to_fix = data.get("itemtofix")
+        user = data.get("user")
+
+        item_to_fix[1][-1] = user
 
         dm = Dameng()
         res = dm.fix_error(table_name, item_to_fix)

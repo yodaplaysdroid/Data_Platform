@@ -175,10 +175,11 @@ def data_transfer(request):
         write_table = data.get("writetable")
         sheet_name = data.get("sheetname")
         use_columns = data.get("usecolumns")
+        user = data.get("user")
 
         minn = Minio_Input(endpoint, access_key, secret_key)
         res = minn.extract(
-            bucket, directory, write_table, filetype, use_columns, sheet_name
+            bucket, directory, write_table, filetype, use_columns, sheet_name, user
         )
         print(res)
         return JsonResponse(res)
