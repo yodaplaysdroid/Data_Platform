@@ -17,7 +17,6 @@ import Home from "./components/Home";
 import Fix from "./components/Fix";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import { useState } from "react";
-import Documentation from "./components/Documentation";
 import Map from "./components/Map";
 import Api from "./components/Api";
 import Login from "./components/Login";
@@ -136,7 +135,10 @@ export default function App() {
                   <Button color="inherit" href="/input/">
                     数据导入
                   </Button>
-                  <Button color="inherit" href="/docs/">
+                  <Button
+                    color="inherit"
+                    onClick={() => window.open("/doc.pdf", "_blank")}
+                  >
                     用户手册
                   </Button>
                   <Tooltip title="Profile">
@@ -247,14 +249,6 @@ export default function App() {
                   ) : (
                     <Fix />
                   )}
-                </>
-              }
-            />
-            <Route
-              path="/docs/"
-              element={
-                <>
-                  <Documentation />
                 </>
               }
             />

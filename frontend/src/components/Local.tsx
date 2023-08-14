@@ -212,7 +212,7 @@ export default function Mysql() {
             fullWidth
           />
           <Button fullWidth sx={{ marginTop: 2 }} onClick={handleUpload}>
-            上传
+            <Typography variant="h6">上传</Typography>
           </Button>
         </>
       ) : null}

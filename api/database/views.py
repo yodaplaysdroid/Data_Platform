@@ -93,7 +93,7 @@ def download(request):
                 results = cursor.fetchall()
                 col = columns[table]
                 col.append("user")
-                df[table] = pd.DataFrame(results, columns=columns[table])
+                df[table] = pd.DataFrame(results, columns=col)
 
             with pd.ExcelWriter("/tmp/download.xlsx") as writer:
                 for table in tables:
