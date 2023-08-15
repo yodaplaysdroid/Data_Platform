@@ -149,7 +149,8 @@ export default function Hdfs() {
         console.log(data);
         let tmp = [data.columns1, data.columns2];
         setColumns(tmp);
-        setChecked(Array(tmp[1].length).fill(""));
+        setChecked(tmp[0].slice(0, tmp[1].length));
+        setEligible(true);
         setPage(4);
       });
   }

@@ -19,13 +19,22 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chart as ChartJS, registerables } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Line, Bar, Pie, Doughnut, Chart } from "react-chartjs-2";
 
 ChartJS.register(...registerables);
 
 export default function Home() {
+  const [seconds, setSeconds] = useState(10);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds((prevSeconds) => prevSeconds - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
   const [res, setRes] = useState<any[]>([]);
   const [status, setStatus] = useState(1);
 
@@ -45,6 +54,12 @@ export default function Home() {
   const [ann4, setAnn4] = useState<any[]>([]);
   const [ann5, setAnn5] = useState<any[]>([]);
   const [ann6, setAnn6] = useState<any[]>([]);
+  const [res1, setRes1] = useState<any[]>([]);
+  const [res2, setRes2] = useState<any[]>([]);
+  const [res3, setRes3] = useState<any[]>([]);
+  const [res4, setRes4] = useState<any[]>([]);
+  const [res5, setRes5] = useState<any[]>([]);
+  const [res6, setRes6] = useState<any[]>([]);
   const [an3v, setAn3v] = useState("");
   const [an5v, setAn5v] = useState("");
 
@@ -150,6 +165,83 @@ export default function Home() {
         }
         setAnn6(t);
       });
+    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析一")
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+        }
+        setRes1(tmp);
+      });
+    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析二")
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+        }
+        setRes2(tmp);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select+*+from+分析3+order+by+y3+desc"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+          tmp[3].push(data.results[i][3]);
+        }
+        setRes3(tmp);
+      });
+    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析四")
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+        }
+        setRes4(tmp);
+      });
+    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析5")
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+        }
+        setRes5(tmp);
+      });
+    fetch(
+      "http://36.140.31.145:31684/dm/?query=select+*+from+分析六+order+by+时间消耗_日"
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setStatus(data.status);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][3]);
+        }
+        setRes6(tmp);
+      });
   }
   function handleChangeYear(e: SelectChangeEvent<unknown>, id: string) {
     fetch(
@@ -196,15 +288,16 @@ export default function Home() {
         console.log(data);
         setAn3v(`${year1}/${month1} ~ ${year2}/${month2}`);
       })
-      .then(() =>
+      .then(() => {
         fetch("http://36.140.31.145:31684/dm/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: `update ops set v = '${year1}/${month1} ~ ${year2}/${month2}' where k = 'ann3'`,
           }),
-        })
-      );
+        });
+      })
+      .then(() => window.location.reload());
   }
   function handleChangeGraph(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -236,7 +329,8 @@ export default function Home() {
             query: `update ops set v = '${type[0]}: ${id}' where k = 'ann5'`,
           }),
         });
-      });
+      })
+      .then(() => window.location.reload());
   }
   const [anchorEl1, setAnchorEl1] = useState<HTMLButtonElement | null>(null);
 
@@ -278,6 +372,7 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
+                height: 350,
               }}
             >
               <Typography
@@ -325,7 +420,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 350,
+                width: 600,
               }}
             >
               <Typography
@@ -336,11 +432,49 @@ export default function Home() {
                 港口吞吐量
               </Typography>
               <br />
-              <iframe
-                style={{ height: 300, width: 600 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670041998813306881&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Chart
+                type="bar"
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res1[0],
+                  datasets: [
+                    {
+                      label: "吞吐量",
+                      data: res1[1],
+                      type: "bar",
+                      backgroundColor: "rgba(75, 192, 192, 0.6)",
+                      borderColor: "rgba(75, 192, 192, 1)",
+                      borderWidth: 1,
+                      yAxisID: "y1",
+                    },
+                    {
+                      label: "总货重",
+                      data: res1[2],
+                      type: "line",
+                      borderColor: "rgba(255, 99, 132, 1)",
+                      borderWidth: 2,
+                      fill: false,
+                      yAxisID: "y2",
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  scales: {
+                    y1: {
+                      beginAtZero: true,
+                      position: "left",
+                    },
+                    y2: {
+                      beginAtZero: true,
+                      position: "right",
+                      grid: {
+                        drawOnChartArea: false,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -349,7 +483,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 350,
+                width: 380,
               }}
             >
               <Typography
@@ -360,11 +495,38 @@ export default function Home() {
                 货物吞吐量百分比（客户量）
               </Typography>
               <br />
-              <iframe
-                style={{ height: 300, width: 380 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670126477594599425&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Doughnut
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res4[0],
+                  datasets: [
+                    {
+                      data: res4[1],
+                      borderWidth: 1,
+                      backgroundColor: [
+                        "#addcc9",
+                        "#dbebc2",
+                        "#fdd2b5",
+                        "#f7a8a6",
+                        "#f48b94",
+                      ],
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 1.2,
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: "right",
+                      align: "start",
+                      labels: {
+                        boxWidth: 20,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -373,7 +535,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 350,
+                width: 380,
               }}
             >
               <Typography
@@ -384,11 +547,38 @@ export default function Home() {
                 货物吞吐量百分比（货重）
               </Typography>
               <br />
-              <iframe
-                style={{ height: 300, width: 480 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1675858839561314306&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Pie
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res4[0],
+                  datasets: [
+                    {
+                      data: res4[2],
+                      borderWidth: 1,
+                      backgroundColor: [
+                        "#475c6c",
+                        "#8a8583",
+                        "#eed7a1",
+                        "#f7efd2",
+                        "#cd8b62",
+                      ],
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 1.2,
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: "right",
+                      align: "start",
+                      labels: {
+                        boxWidth: 20,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -397,7 +587,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 350,
+                width: 900,
               }}
             >
               <Typography
@@ -408,11 +599,49 @@ export default function Home() {
                 港口不同类型货物吞吐量
               </Typography>
               <br />
-              <iframe
-                style={{ height: 300, width: 800 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670113882892410881&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Chart
+                type="bar"
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res2[0],
+                  datasets: [
+                    {
+                      label: "客户量",
+                      data: res2[1],
+                      backgroundColor: "rgba(255, 51, 153, 0.6)",
+                      borderColor: "rgba(255, 51, 153, 1)",
+                      borderWidth: 1,
+                      yAxisID: "y1",
+                    },
+                    {
+                      label: "总货重",
+                      data: res2[2],
+                      type: "line",
+                      borderColor: "rgba(204, 0, 204, 1)",
+                      borderWidth: 2,
+                      fill: false,
+                      yAxisID: "y2",
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 2.8,
+                  responsive: true,
+                  scales: {
+                    y1: {
+                      beginAtZero: true,
+                      position: "left",
+                    },
+                    y2: {
+                      beginAtZero: true,
+                      position: "right",
+                      grid: {
+                        drawOnChartArea: false,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -445,7 +674,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 450,
+                width: 1000,
               }}
             >
               <Typography
@@ -456,11 +686,84 @@ export default function Home() {
                 货物吞吐同比环比分析（{an3v}）
               </Typography>
               <br />
-              <iframe
-                style={{ height: 400, width: 1000 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670457086149926913&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Line
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res3[0],
+                  datasets: [
+                    {
+                      label: "时间段1",
+                      data: res3[1],
+                      backgroundColor: "rgba(51, 153, 255, 0.2)",
+                      borderColor: "rgba(51, 153, 255, 1)",
+                      borderWidth: 1,
+                      fill: "origin",
+                    },
+                    {
+                      label: "时间段2",
+                      data: res3[2],
+                      backgroundColor: "rgba(255, 153, 51, 0.2)",
+                      borderColor: "rgba(255, 153, 51, 1)",
+                      borderWidth: 1,
+                      fill: "origin",
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 5,
+                  responsive: true,
+                  scales: {
+                    x: {
+                      grid: {
+                        display: false,
+                      },
+                    },
+                    y: {
+                      beginAtZero: true,
+                    },
+                  },
+                  plugins: {
+                    legend: {
+                      position: "right",
+                    },
+                  },
+                }}
+              />
+              <br />
+              <Bar
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res2[0],
+                  datasets: [
+                    {
+                      label: "增长（%）",
+                      data: res3[3],
+                      backgroundColor: "rgba(51, 255, 153, 0.6)",
+                      borderColor: "rgba(51, 255, 153, 1)",
+                      borderWidth: 1,
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 5,
+                  responsive: true,
+                  scales: {
+                    x: {
+                      grid: {
+                        display: false,
+                      },
+                    },
+                    y: {
+                      beginAtZero: true,
+                    },
+                  },
+                  plugins: {
+                    legend: {
+                      position: "right",
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -469,6 +772,7 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
+                height: 450,
               }}
             >
               <Typography variant="button" fontSize={15}>
@@ -598,7 +902,8 @@ export default function Home() {
               {month1 !== undefined &&
               month2 !== undefined &&
               year1 !== undefined &&
-              year2 !== undefined ? (
+              year2 !== undefined &&
+              seconds <= 0 ? (
                 <Button
                   onClick={handleChangeDate}
                   fullWidth
@@ -619,7 +924,7 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                width: 1380,
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -631,13 +936,19 @@ export default function Home() {
                   货物流向分析（{an5v}）
                 </Typography>
                 <div>
-                  <Button
-                    sx={{ width: 100 }}
-                    color="inherit"
-                    onClick={handleClick}
-                  >
-                    堆存港口
-                  </Button>
+                  {seconds <= 0 ? (
+                    <Button
+                      sx={{ width: 100 }}
+                      color="inherit"
+                      onClick={handleClick}
+                    >
+                      堆存港口
+                    </Button>
+                  ) : (
+                    <Button sx={{ width: 100 }} color="inherit">
+                      堆存港口
+                    </Button>
+                  )}
                   <Popover
                     open={open}
                     anchorEl={anchorEl}
@@ -663,13 +974,19 @@ export default function Home() {
                       </>
                     ))}
                   </Popover>
-                  <Button
-                    sx={{ width: 100 }}
-                    color="inherit"
-                    onClick={handleClick1}
-                  >
-                    货物名称
-                  </Button>
+                  {seconds <= 0 ? (
+                    <Button
+                      sx={{ width: 100 }}
+                      color="inherit"
+                      onClick={handleClick1}
+                    >
+                      货物名称
+                    </Button>
+                  ) : (
+                    <Button sx={{ width: 100 }} color="inherit">
+                      货物名称
+                    </Button>
+                  )}
                   <Popover
                     open={open1}
                     anchorEl={anchorEl1}
@@ -698,11 +1015,49 @@ export default function Home() {
                 </div>
               </div>
               <br />
-              <iframe
-                style={{ height: 300, width: 1380 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670663863973978113&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Chart
+                type="bar"
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res5[0],
+                  datasets: [
+                    {
+                      label: "货物吞吐量",
+                      data: res5[1],
+                      backgroundColor: "rgba(153, 51, 255, 0.6)",
+                      borderColor: "rgba(153, 51, 255, 1)",
+                      borderWidth: 1,
+                      yAxisID: "y1",
+                    },
+                    {
+                      label: "总货重",
+                      data: res5[2],
+                      type: "line",
+                      borderColor: "rgba(204, 204, 0, 1)",
+                      borderWidth: 2,
+                      fill: false,
+                      yAxisID: "y2",
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 4,
+                  responsive: true,
+                  scales: {
+                    y1: {
+                      beginAtZero: true,
+                      position: "left",
+                    },
+                    y2: {
+                      beginAtZero: true,
+                      position: "right",
+                      grid: {
+                        drawOnChartArea: false,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
             <Card
               sx={{
@@ -829,7 +1184,6 @@ export default function Home() {
                       data: ann6[1],
                       fill: false,
                       borderColor: "#711490",
-                      tension: 0.1,
                     },
                   ],
                 }}
@@ -842,7 +1196,8 @@ export default function Home() {
                 borderRadius: 5,
                 p: 4,
                 margin: 2,
-                height: "fit-content",
+                height: 350,
+                width: 680,
               }}
             >
               <Typography
@@ -853,11 +1208,45 @@ export default function Home() {
                 运输时间周期分析
               </Typography>
               <br />
-              <iframe
-                style={{ height: 300, width: 680 }}
-                src="http://120.55.190.237:8015/dataview/publish/page.html?pageId=1670137009093484545&isTemplate=0"
-                frameBorder={0}
-              ></iframe>
+              <Line
+                style={{ marginLeft: 10 }}
+                data={{
+                  labels: res6[0],
+                  datasets: [
+                    {
+                      label: "日",
+                      data: res6[1],
+                      borderColor: "rgba(255, 51, 255, 1)",
+                      borderWidth: 2,
+                      fill: false,
+                      yAxisID: "y1",
+                    },
+                    {
+                      label: "流转周期",
+                      data: res6[2],
+                      borderColor: "rgba(51, 255, 153, 1)",
+                      borderWidth: 2,
+                      fill: false,
+                      yAxisID: "y2",
+                    },
+                  ],
+                }}
+                options={{
+                  aspectRatio: 2,
+                  responsive: true,
+                  scales: {
+                    y1: {
+                      position: "left",
+                    },
+                    y2: {
+                      position: "right",
+                      grid: {
+                        drawOnChartArea: false,
+                      },
+                    },
+                  },
+                }}
+              />
             </Card>
           </Box>
         </>

@@ -170,7 +170,7 @@ export default function Edit(props: EditProps) {
                   paddingTop: 50,
                 }}
               >
-                <Button onClick={() => setOpen(false)}>继续修高</Button>
+                <Button onClick={() => setOpen(false)}>继续修改</Button>
                 <Button onClick={() => window.location.reload()}>放弃</Button>
               </div>
             </>
