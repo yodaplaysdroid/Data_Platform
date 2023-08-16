@@ -190,19 +190,35 @@ export default function Home() {
         setRes2(tmp);
       });
     fetch(
-      "http://36.140.31.145:31684/dm/?query=select+*+from+分析3+order+by+y3+desc"
+      `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(
+        "select v from ops where k = 'ann3'"
+      )}`
     )
       .then((response) => response.json())
       .then((data) => {
-        setStatus(data.status);
-        let tmp: any = [[], [], [], []];
-        for (let i in data.results) {
-          tmp[0].push(data.results[i][0]);
-          tmp[1].push(data.results[i][1]);
-          tmp[2].push(data.results[i][2]);
-          tmp[3].push(data.results[i][3]);
-        }
-        setRes3(tmp);
+        let [d1, d2] = data.results[0][0].split(" ~ ");
+        const query = `select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重))*100/sum(s1.总货重) as y3 from
+          (select * from 分析三 where 年月 like '%${d1}%') as s1,
+          (select * from 分析三 where 年月 like '%${d2}%') as s2
+          where s1.货物名称 = s2.货物名称
+          group by s1.货物名称
+          order by y3 desc;`;
+
+        fetch(
+          `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(query)}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            setStatus(data.status);
+            let tmp: any = [[], [], [], []];
+            for (let i in data.results) {
+              tmp[0].push(data.results[i][0]);
+              tmp[1].push(data.results[i][1]);
+              tmp[2].push(data.results[i][2]);
+              tmp[3].push(data.results[i][3]);
+            }
+            setRes3(tmp);
+          });
       });
     fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析四")
       .then((response) => response.json())
@@ -216,17 +232,34 @@ export default function Home() {
         }
         setRes4(tmp);
       });
-    fetch("http://36.140.31.145:31684/dm/?query=select+*+from+分析5")
+    fetch(
+      `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(
+        "select v from ops where k = 'ann5'"
+      )}`
+    )
       .then((response) => response.json())
       .then((data) => {
-        setStatus(data.status);
-        let tmp: any = [[], [], []];
-        for (let i in data.results) {
-          tmp[0].push(data.results[i][0]);
-          tmp[1].push(data.results[i][1]);
-          tmp[2].push(data.results[i][2]);
+        let [type, id] = data.results[0][0].split(": ");
+        let query = "";
+        if (type == "货物名称") {
+          query = `select 堆存港口 as x, 数量吞吐量, 总货重 from 分析五 where 货物名称 = '${id}'`;
+        } else {
+          query = `select 货物名称 as x, 数量吞吐量, 总货重 from 分析五 where 堆存港口 = '${id}'`;
         }
-        setRes5(tmp);
+        fetch(
+          `http://36.140.31.145:31684/dm/?query=${encodeURIComponent(query)}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            setStatus(data.status);
+            let tmp: any = [[], [], []];
+            for (let i in data.results) {
+              tmp[0].push(data.results[i][0]);
+              tmp[1].push(data.results[i][1]);
+              tmp[2].push(data.results[i][2]);
+            }
+            setRes5(tmp);
+          });
       });
     fetch(
       "http://36.140.31.145:31684/dm/?query=select+*+from+分析六+order+by+时间消耗_日"
@@ -262,75 +295,64 @@ export default function Home() {
   }
   function handleChangeDate() {
     console.log(year1, year2, month1, month2);
-    fetch("http://36.140.31.145:31684/dm/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: "drop view 分析3",
-      }),
-    })
-      .then(() =>
-        fetch("http://36.140.31.145:31684/dm/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `create view 分析3 as
+    const query = `
         select s1.货物名称, sum(s1.总货重) as y1, sum(s2.总货重) as y2, (sum(s2.总货重) - sum(s1.总货重))*100/sum(s1.总货重) as y3 from
         (select * from 分析三 where 年月 like '${year1}-${month1}%') as s1,
         (select * from 分析三 where 年月 like '${year2}-${month2}%') as s2
         where s1.货物名称 = s2.货物名称
-        group by s1.货物名称`,
-          }),
-        })
-      )
+        group by s1.货物名称
+        order by y3 desc`;
+    fetch(`http://36.140.31.145:31684/dm/?query=${encodeURIComponent(query)}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setAn3v(`${year1}/${month1} ~ ${year2}/${month2}`);
-      })
-      .then(() => {
-        fetch("http://36.140.31.145:31684/dm/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `update ops set v = '${year1}/${month1} ~ ${year2}/${month2}' where k = 'ann3'`,
-          }),
-        });
-      })
-      .then(() => window.location.reload());
+        let tmp: any = [[], [], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+          tmp[3].push(data.results[i][3]);
+        }
+        setRes3(tmp);
+        setAn3v(`${year1}-${month1} ~ ${year2}-${month2}`);
+      });
+    fetch("http://36.140.31.145:31684/dm/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `update ops set v = '${year1}-${month1} ~ ${year2}-${month2}' where k = 'ann3'`,
+      }),
+    });
   }
   function handleChangeGraph(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     type: string[]
   ) {
+    handleClose();
+    handleClose1();
     const id = e.currentTarget.id;
+    const query = `select ${type[1]} as x, 数量吞吐量, 总货重 from 分析五 where ${type[0]} = '${id}'`;
+    setAn5v(`${type[0]}: ${id}`);
     fetch("http://36.140.31.145:31684/dm/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: "drop view 分析5",
+        query: `update ops set v = '${type[0]}: ${id}' where k = 'ann5'`,
       }),
-    })
-      .then(() => {
-        fetch("http://36.140.31.145:31684/dm/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `create view 分析5 as select ${type[1]} as x, 数量吞吐量, 总货重 from 分析五 where ${type[0]} = '${id}'`,
-          }),
-        });
-      })
-      .then(() => {
-        setAn5v(`${type[0]}: ${id}`);
-        fetch("http://36.140.31.145:31684/dm/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `update ops set v = '${type[0]}: ${id}' where k = 'ann5'`,
-          }),
-        });
-      })
-      .then(() => window.location.reload());
+    });
+    fetch(`http://36.140.31.145:31684/dm/?query=${encodeURIComponent(query)}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        let tmp: any = [[], [], []];
+        for (let i in data.results) {
+          tmp[0].push(data.results[i][0]);
+          tmp[1].push(data.results[i][1]);
+          tmp[2].push(data.results[i][2]);
+        }
+        console.log(data);
+        setRes5(tmp);
+      });
   }
   const [anchorEl1, setAnchorEl1] = useState<HTMLButtonElement | null>(null);
 

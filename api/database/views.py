@@ -3,18 +3,12 @@ from django.views.decorators.csrf import csrf_exempt
 import dmPython
 import pandas as pd
 
-tables = ["物流公司", "客户信息", "物流信息", "集装箱动态", "装货表", "卸货表"]
+tables = ["物流公司", "客户信息", "物流信息", "集装箱动态", "装货表", "卸货表", "username"]
 columns = {
-    "物流公司": [
-        "公司名称",
-        "客户编号",
-        "联系人",
-        "电话",
-        "省市区",
-    ],
-    "客户信息": ["客户名称", "客户编号", "手机号", "省市区"],
-    "物流信息": ["提单号", "货主名称", "货主代码", "物流公司_货代", "集装箱箱号", "货物名称", "货重_吨"],
-    "集装箱动态": ["堆存港口", "集装箱箱号", "箱尺寸_TEU", "提单号", "堆场位置", "操作", "操作日期"],
+    "物流公司": ["公司名称", "客户编号", "联系人", "电话", "省市区", "username"],
+    "客户信息": ["客户名称", "客户编号", "手机号", "省市区", "username"],
+    "物流信息": ["提单号", "货主名称", "货主代码", "物流公司_货代", "集装箱箱号", "货物名称", "货重_吨", "username"],
+    "集装箱动态": ["堆存港口", "集装箱箱号", "箱尺寸_TEU", "提单号", "堆场位置", "操作", "操作日期", "username"],
     "装货表": [
         "船公司",
         "船名称",
@@ -28,6 +22,7 @@ columns = {
         "箱尺寸_TEU",
         "启运地",
         "目的地",
+        "username",
     ],
     "卸货表": [
         "船公司",
@@ -42,6 +37,7 @@ columns = {
         "箱尺寸_TEU",
         "启运地",
         "目的地",
+        "username",
     ],
 }
 
@@ -91,9 +87,7 @@ def download(request):
             for table in tables:
                 cursor.execute((f"select * from DT.{table}"))
                 results = cursor.fetchall()
-                col = columns[table]
-                col.append("user")
-                df[table] = pd.DataFrame(results, columns=col)
+                df[table] = pd.DataFrame(results, columns=columns[table])
 
             with pd.ExcelWriter("/tmp/download.xlsx") as writer:
                 for table in tables:
